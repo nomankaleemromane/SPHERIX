@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPHERIX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f13;
+            --bg-darker: #080c10;
+            --text-light: #e6f0ea;
+            --accent-teal: #00bfa6;
+            --accent-glow: rgba(0, 191, 166, 0.3);
+            --card-bg: rgba(12, 16, 20, 0.95);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Modern background with gradient mesh */
+        .modern-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(0, 191, 166, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(126, 243, 221, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(12, 16, 20, 0.9) 0%, transparent 50%);
+            opacity: 0.6;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 480px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Logo */
+        .logo {
+            width: 160px;
+            height: auto;
+            margin-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Main card */
+        .main-card {
+            background: linear-gradient(135deg, rgba(8,12,16,0.98) 0%, rgba(12,16,20,0.95) 100%);
+            backdrop-filter: blur(20px) saturate(1.2);
+            border-radius: var(--border-radius);
+            padding: 50px 40px;
+            width: 100%;
+            box-shadow: 
+                0 20px 40px rgba(2, 8, 20, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            animation: cardEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(126, 243, 221, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .main-card:hover::before {
+            left: 100%;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Headings */
+        h1 {
+            font-family: 'Passion One', cursive;
+            font-size: 2.8rem;
+            color: #7ef3dd;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 20px rgba(126, 243, 221, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 40px;
+            color: rgba(230, 240, 234, 0.8);
+            line-height: 1.6;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c9a9, #00a88b);
+            color: #052018;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(0, 191, 166, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 35px rgba(0, 191, 166, 0.6),
+                0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #9ff0e2;
+            border: 1.5px solid rgba(159, 240, 226, 0.3);
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(159, 240, 226, 0.1);
+            border-color: rgba(159, 240, 226, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(159, 240, 226, 0.2);
+        }
+
+        /* Data sources badge */
+        .data-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #a8b6b2;
+        }
+
+        .nasa-tag {
+            background: linear-gradient(135deg, #00bfa6, #7ef3dd);
+            color: #052018;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(160, 160, 176, 0.6);
+            max-width: 400px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .main-card {
+                padding: 40px 30px;
+            }
+            
+            h1 {
+                font-size: 2.4rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                width: 140px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .main-card {
+                padding: 35px 25px;
+            }
+            
+            .btn-primary, .btn-secondary {
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Loading animation for buttons */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .btn-primary .icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern background -->
+    <div class="modern-bg"></div>
+    <div class="bg-grid"></div>
+    
+    <!-- Main container -->
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo">
+            <img src="images/logo2.svg" alt="SPHERIX">
+        </div>
+
+        <!-- Main content card -->
+        <div class="main-card">
+            
+            <div class="tagline">
+                Advanced urban analytics platform powered by satellite data and AI insights
+            </div>
+            <div class="button-group">
+                <a href="dashboard.html" class="btn-primary">
+                    <span class="icon"></span>
+                    Launch Demo Dashboard
+                </a>
+                <a href="project_plan.html" class="btn-secondary">
+                    Project Plan
+                </a>
+                <a href="mobileapp.html" class="btn-secondary">
+                    Mobile App Prototype For Residents
+
+                </a>
+            </div>
+            </div>
+
+            <div class="data-badge">
+                <span>Powered by</span>
+                <div class="nasa-tag">NASA DATA</div>
+                <span>+ Cesium</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>NASA Space Apps Challenge 2025 • Team SPHERIX</p>
+        </footer>
+    </div>
+
+    <script>
+        // Enhanced animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add subtle parallax effect to background
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                document.querySelector('.modern-bg').style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+
+            // Track dashboard access
+            document.querySelector('.btn-primary').addEventListener('click', function() {
+                // Analytics tracking can be added here
+                console.log('SPHERIX dashboard accessed');
+            });
+
+            // Add loading state to primary button
+            const primaryBtn = document.querySelector('.btn-primary');
+            primaryBtn.addEventListener('click', function(e) {
+                if (!this.classList.contains('loading')) {
+                    this.classList.add('loading');
+                    this.innerHTML = '<span class="icon"></span>Launching...';
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                        this.innerHTML = '<span class="icon"></span>Launch Dashboard';
+                    }, 2000);
+                }
+            });
+        });
+
+        // Add floating animation to main card
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                33% { transform: translateY(-8px) rotate(0.5deg); }
+                66% { transform: translateY(-4px) rotate(-0.5deg); }
+            }
+            
+            .main-card {
+                animation: cardEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1), float 8s ease-in-out infinite;
+            }
+            
+            .btn-primary.loading {
+                animation: pulse 1s ease-in-out infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

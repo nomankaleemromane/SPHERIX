@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SPHERIX - Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Cesium 1.120 -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+    /* style-only content continues here - JS moved into <script> */
+
+    /* style-only content continues here - JS moved into <script> */
+    #cesiumContainer {
+      position: absolute;
+      inset: 0; 
+      transition: margin-left 0.3s ease;
+    }
+    .cesium-widget-credits { display: none !important; }
+    #loadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1e1e2f;
+      color: #e6f0ea;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .loading-content { text-align: center; max-width: 300px; display:flex;flex-direction:column;align-items:center;gap:20px;}
+    .loading-spinner { width:60px;height:60px;border:4px solid rgba(0,191,166,0.3);border-top:4px solid #00bfa6;border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    .loading-text{font-size:28px;font-weight:500;color:#00bfa6;font-family:'Passion One',cursive;margin:0;}
+    .loading-subtext{font-size:16px;color:#a0a0b0;margin:0;font-weight:300;}
+
+    /* Modernized left dashboard panel */
+    #dashboardPanel{
+      position:fixed;
+      top:0;
+      left:0;
+      width:320px;
+      height:100vh;
+      z-index:1000;
+      box-sizing:border-box;
+      padding:22px;
+      color:#e6f0ea;
+      /* subtle, deep background with slight translucency to blend with the map */
+      background: linear-gradient(180deg, rgba(8,12,16,0.96) 0%, rgba(12,16,20,0.92) 100%);
+      backdrop-filter: blur(6px) saturate(1.08);
+      box-shadow: 6px 0 30px rgba(2,8,20,0.65);
+      border-right: 1px solid rgba(255,255,255,0.03);
+      overflow-y:auto;
+    }
+
+    /* Headline (if present) and section headings kept distinctive but more refined */
+    #dashboardPanel h1{
+      font-family:'Passion One',cursive;
+      font-size:22px;
+      margin:0 0 18px 0;
+      color:#7ef3dd; /* softened aqua */
+      text-align:center;
+      border-bottom: 1px dashed rgba(126,243,221,0.08);
+      padding-bottom:10px;
+    }
+
+    .panel-section{
+      margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      padding:12px;
+      border-radius:10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.012);
+    }
+
+    .panel-section h2{
+      font-family:'Passion One',cursive;
+      font-size:15px;
+      margin:0 0 12px 0;
+      color:#9ff0e2;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .legend-item{display:flex;align-items:center;margin-bottom:10px;font-size:14px;color:#dff9f1}
+    .legend-color{width:18px;height:18px;border-radius:4px;margin-right:10px;flex:0 0 auto;box-shadow:0 1px 3px rgba(0,0,0,0.45);}
+    .legend-heat{background-color:#ff9800}.legend-green{background-color:#00bfa6}.legend-housing{background-color:#795548}.legend-light{background-color:#ffd54f}.legend-air{background-color:#9c27b0}.legend-pop{background-color:#42a5f5}
+
+    .form-group{display:flex;flex-direction:column;margin-bottom:12px}
+    .form-group label{font-size:13px;color:#a8b6b2;margin-bottom:8px;font-weight:600}
+
+    /* Checkboxes list - neutral backdrop with clear spacing; allow internal scrolling */
+    .checkbox-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:220px;
+      overflow:auto;
+      padding:8px;
+      background:transparent;
+      border: none;
+    }
+
+    .checkbox-item{display:flex;align-items:center;gap:10px}
+    .checkbox-item input{accent-color:#00bfa6;transform:scale(1.05)}
+    .checkbox-item label{color:#d7f2ee;font-size:14px}
+
+    .timeline{display:flex;flex-direction:column}
+    .timeline .value{font-size:12px;color:#a0a0b0;margin-top:4px}
+
+    .logo-container{text-align:center;margin-bottom:14px;padding-bottom:8px}
+    .logo-img{max-width:140px;height:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45));}
+
+    .hint{font-size:12px;color:#9aa7b2;margin-top:6px}
+
+    /* Scrollbar styling - modern, matching the dashboard accent */
+    /* Webkit browsers (Chrome/Edge/Safari) */
+    #dashboardPanel::-webkit-scrollbar, .checkbox-list::-webkit-scrollbar { width: 10px; }
+    #dashboardPanel::-webkit-scrollbar-track, .checkbox-list::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 8px 0;
+    }
+    #dashboardPanel::-webkit-scrollbar-thumb, .checkbox-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #00bfa6, #007a66);
+      border-radius: 8px;
+      border: 2px solid rgba(8,12,16,0.45);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    #dashboardPanel::-webkit-scrollbar-thumb:hover, .checkbox-list::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #00a08f, #00624f);
+    }
+
+    /* Firefox scrollbar support */
+    #dashboardPanel, .checkbox-list { scrollbar-width: thin; scrollbar-color: #00bfa6 transparent; }
+
+    /* AI Advisor - modern, card-like style (keeps IDs for JS integration) */
+    #aiAdvisor {
+      /* Fixed so it anchors to the viewport right edge and doesn't shift with document flow */
+      position: fixed;
+      right: 0;
+      top: 48px; /* sits below the top navigation */
+      width: 380px; /* Slightly wider for better readability */
+      height: calc(100% - 48px); /* default full height under top nav; JS will adjust when analytics is visible */
+      box-sizing: border-box;
+      z-index: 1995; /* raised so AI panel stays above analytics but below modal (2000) */
+      pointer-events: auto;
+      display: none;
+      background: linear-gradient(180deg, #0b0f13 0%, #0d1115 100%);
+      border-left: 1px solid rgba(255,255,255,0.03);
+      box-shadow: -5px 0 30px rgba(2,8,20,0.65);
+      overflow: hidden; /* keep inner scroll areas independent */
+    }
+    #aiAdvisorInner {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 19px;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+
+
+    #aiAdvisorInner .ai-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .ai-title {
+      font-family:'Passion One',cursive;
+      font-size:18px;
+      color:#7ef3dd;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .ai-subtitle { font-size:12px;color:#9aa7b2 }
+
+    /* Adjust existing ai-controls to be more compact */
+    .ai-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #aiRecommendBtn {
+      background: linear-gradient(180deg,#00c9a9,#00a88b);
+      border: none;
+      padding: 8px 12px;
+      color: #052018;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      flex: 0 0 auto;
+      font-size: 12px;
+      box-shadow: 0 4px 12px rgba(0,191,166,0.14);
+    }
+    #aiRecommendBtn:active { transform: translateY(1px); }
+
+    #aiStatus {
+      font-size: 11px;
+      color: #cfd8dc;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    /* aiResults removed: responses now render inside the chat messages */
+
+    .ai-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      background: #0a0d11;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 200px;
+      max-height: 400px;
+    }
+
+    .ai-message {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 85%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ai-system-message {
+      background: rgba(0,191,166,0.1);
+      border: 1px solid rgba(0,191,166,0.2);
+      color: #7ef3dd;
+      align-self: center;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .ai-user-message {
+      background: rgba(0,123,255,0.15);
+      border: 1px solid rgba(0,123,255,0.3);
+      color: #e6f0ea;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .ai-assistant-message {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #cfd8dc;
+      align-self: flex-start;
+    }
+
+    .ai-recommendation-message {
+      background: rgba(126, 243, 221, 0.08);
+      border: 1px solid rgba(126, 243, 221, 0.15);
+      color: #e6f0ea;
+      align-self: stretch;
+      border-left: 3px solid #00bfa6;
+    }
+
+    /* Controls Area */
+    .ai-controls-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+      margin-top: auto; /* This pushes it to the bottom */
+      padding-top: 12px; /* Add some spacing */
+    }
+
+    .ai-chat-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ai-recommend-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #aiChatInput {
+      flex: 1;
+      padding: 10px 12px;
+      background: #0a0d11;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #e6f0ea;
+      font-size: 13px;
+      font-family: 'Poppins', sans-serif;
+      transition: border-color 0.2s ease;
+    }
+
+    #aiChatInput:focus {
+      outline: none;
+      border-color: #00bfa6;
+      box-shadow: 0 0 0 2px rgba(0,191,166,0.2);
+    }
+
+    #aiSendBtn, #aiRecommendBtn {
+      background: linear-gradient(180deg, #00c9a9, #00a88b);
+      border: none;
+      padding: 10px 16px;
+      color: #052018;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      white-space: nowrap;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    #aiSendBtn:disabled, #aiRecommendBtn:disabled {
+      background: #666;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    #aiSendBtn:hover:not(:disabled), #aiRecommendBtn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,191,166,0.3);
+    }
+
+    /* Scrollbar for chat */
+    .ai-chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(0,191,166,0.3);
+      border-radius: 3px;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+      background: rgba(0,191,166,0.5);
+    }
+    /* Analytics show/hide animations */
+    #analyticsWrapper{transition: max-height 0.35s ease, opacity 0.35s ease; will-change: max-height, opacity;}
+    .analytics-hidden{max-height:0;opacity:0;pointer-events:none;overflow:hidden}
+    .analytics-visible{max-height:1200px;opacity:1;pointer-events:auto}
+    /* Top navigation - full width across the map area */
+    #topNav {
+      position: absolute;
+      /* sit above the map and not overlap it */
+      left: 320px;
+      right: 0;
+      top: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px;
+      z-index: 1500;
+  /* solid, fully opaque background (no translucency) */
+  background: #0b0f13;
+      /* no rounded corners per request */
+      border-radius: 0;
+      box-shadow: 0 8px 24px rgba(2,8,20,0.45);
+      border: 0; /* keep it visually flush */
+  /* remove translucency/blur to keep top nav fully opaque */
+      gap: 12px;
+      overflow: visible;
+      pointer-events: auto;
+    }
+  #topNav .nav-left { display:flex;gap:12px;align-items:center }
+    #topNav a { color: #d5f6ee; text-decoration: none; font-weight:600; font-size:14px; padding:8px 12px; border-radius:8px }
+    #topNav a:hover { background: rgba(0,191,166,0.06); color:#00bfa6 }
+    #topNav .nav-right { display:flex;gap:12px;align-items:center }
+    #topNav .slider-wrap { display:flex;gap:10px;align-items:center;padding-left:8px;padding-right:8px }
+  #topNav input[type=range] { width:240px; height:6px; -webkit-appearance:none; appearance:none; background:transparent }
+    #topNav .year-pill { background:linear-gradient(90deg,#012327,#033b34);color:#aeeadf;padding:6px 10px;border-radius:8px;font-weight:700;border:1px solid rgba(255,255,255,0.03) }
+
+    /* Range input styling */
+    #topNav input[type=range]::-webkit-slider-runnable-track { height:6px; background:linear-gradient(90deg,#083435,#013b36); border-radius:8px }
+    #topNav input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; margin-top:-6px; background:#00bfa6; border-radius:50%; box-shadow:0 2px 6px rgba(0,191,166,0.35); border:3px solid rgba(2,8,10,0.35) }
+    #topNav input[type=range]:focus { outline:none }
+    #topNav input[type=range]::-moz-range-track { height:6px; background:linear-gradient(90deg,#083435,#013b36); border-radius:8px }
+    #topNav input[type=range]::-moz-range-thumb { width:18px; height:18px; background:#00bfa6; border-radius:50%; border:3px solid rgba(2,8,10,0.35) }
+    /* Toast popup (top-center, below top nav) */
+    .toast-popup {
+      position: fixed;
+      left: 50%;
+      top: 60px; /* sits below the top nav (topNav height ~48px) */
+      transform: translateX(-50%) translateY(-6px);
+      background: rgba(6, 20, 24, 0.95);
+      color: #e6f0ea;
+      padding: 10px 16px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 4000; /* above top nav */
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+    .toast-popup.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .toast-icon { width:18px;height:18px;border-radius:4px;background:#00bfa6;flex:0 0 auto }
+
+/* Enhanced loading screen styles */
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0b0f13 0%, #0d1115 50%, #0a1a1a 100%);
+  color: #e6f0ea;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-content { 
+  text-align: center; 
+  max-width: 300px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loading-progress {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0,191,166,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bfa6, #7ef3dd);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: progressPulse 2s infinite;
+}
+
+@keyframes progressPulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.loading-text {
+  font-size: 28px;
+  font-weight: 500;
+  color: #00bfa6;
+  font-family: 'Passion One', cursive;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0,191,166,0.3);
+}
+
+.loading-subtext {
+  font-size: 16px;
+  color: #a0a0b0;
+  margin: 0;
+  font-weight: 300;
+  min-height: 20px;
+}
+  </style>
+</style>
+
+</head>
+<body>
+    <div id="topNav">
+      <div class="nav-left">
+        <a href="#">Dashboard</a>
+        <a href="project_plan.html">Project Plan</a>
+        <a href="mobileapp.html">Mobile App</a>
+      </div>
+      <div class="nav-right">
+        <div class="slider-wrap">
+          <span style="color: #a0a0b0; font-size: 13px; margin-right: 10px; white-space: nowrap;">Select timeline:</span>
+          <input id="yearSlider" type="range" min="2018" max="2024" step="2" value="2024">
+          <div class="year-pill"><span id="yearValue">2024</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="loadingScreen">
+      <div class="loading-content">
+        <div class="loading-spinner" style="width:60px;height:60px;border:4px solid rgba(0,191,166,0.3);border-top:4px solid #00bfa6;border-radius:50%;animation:spin 1s linear infinite;"></div>
+        <div class="loading-text">SPHERIX</div>
+        <div class="loading-subtext" id="loadingStatus">Initializing environment...</div>
+        <div class="loading-progress">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- AI Advisor Panel (compact right-side panel under the top nav) -->
+  <!-- AI Advisor - unified chat and recommendations -->
+  <div id="aiAdvisor">
+    <div id="aiAdvisorInner">
+      <div class="ai-header">
+        <div class="ai-title">AI Urban Advisor</div>
+      </div>
+      
+      <!-- Unified Chat Area -->
+      <div id="aiChatMessages" class="ai-chat-messages">
+        <div class="ai-message ai-system-message" id="aiSystemPrompt">
+          Ask questions about the selected data or get automated recommendations.
+        </div>
+
+        <!-- Inline recommend button placed inside the chat area as requested -->
+        <div id="aiRecommendWrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:12px;width:100%;gap:8px;">
+          <button id="aiRecommendBtn" style="min-width:220px;padding:10px 14px;border-radius:8px;font-weight:700">Get Planning Recommendations</button>
+          <div id="aiStatus" style="color:#9aa7b2;font-size:13px;text-align:center">Ready</div>
+        </div>
+      </div>
+
+      <!-- Controls Area (chat input) -->
+      <div class="ai-controls-area">
+        <div class="ai-chat-controls">
+          <input type="text" id="aiChatInput" placeholder="Ask about the selected data..." maxlength="500">
+          <button id="aiSendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboardPanel">
+    <div class="logo-container">
+      <img src="images/logo2.svg" alt="SPHERIX Logo" class="logo-img">
+    </div>
+    <div class="panel-section">
+      <h2>Legend</h2>
+      <div id="legendContainer"></div>
+    </div>
+    <div class="panel-section">
+      <h2>Selection</h2>
+      <div class="form-group">
+        <label>Areas</label>
+        <div id="areasList" class="checkbox-list"></div>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <div id="dataList" class="checkbox-list">
+          <div class="checkbox-item"><input type="checkbox" id="data_heat" value="heat"><label for="data_heat">Heat</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="data_green" value="green"><label for="data_green">Green spaces</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="data_housing" value="housing"><label for="data_housing">Housing developments</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="data_light" value="light"><label for="data_light">Light</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="data_air" value="air"><label for="data_air">Air quality</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="data_population" value="population"><label for="data_population">Population (2020 baseline)</label></div>
+        </div>
+      </div>
+      <div class="form-group timeline">
+        </div>
+      <div class="hint">Rules: one data layer per area at a time. Multiple areas can be on.</div>
+    </div>
+    <div class="panel-section">
+      <h2>Future predictions</h2>
+      <div style="font-size:13px;color:#cfd8dc;margin-bottom:8px">Generate and view statistical predictions for 2026, 2028 and 2030.</div>
+      <div style="display:flex;gap:8px;flex-direction:column">
+        <button id="openPredictionsBtn" style="background:#00bfa6;border:none;padding:10px;color:#012;font-weight:600;cursor:pointer;border-radius:6px">Open Predictions</button>
+        <div style="font-size:12px;color:#9aa7b2">Predictions are simple linear extrapolations based on historical CSV data.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cesiumWrapper" style="position:absolute;left:320px;right:0;top:48px;bottom:0;pointer-events:auto;">
+    <div id="cesiumContainer" style="width:100%;height:100%;overflow:hidden;"></div>
+  </div>
+
+  <!-- Analytics Panel (below the map) -->
+  <div id="analyticsWrapper" class="analytics-hidden" style="position:absolute;left:320px;right:0;top:70%;bottom:0;background:#0f0f1a;color:#e6f0ea;padding:0;box-sizing:border-box;overflow:auto;display:none;">
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;padding:16px;">
+      <div style="min-width:320px;max-width:480px;flex:0 0 380px;">
+        <div style="font-family:'Passion One',cursive;color:#00bfa6;font-size:18px;margin-bottom:8px;">Analysis</div>
+        <div id="analysisText" style="font-size:13px;color:#cfd8dc;line-height:1.5;">Select areas and a data type to view statistics and trends.</div>
+        <div id="analysisMeta" style="font-size:11px;color:#9aa7b2;margin-top:6px;"></div>
+  <div id="analysisAssessment" style="margin-top:8px;font-size:13px;padding:6px 8px;display:inline-block;color:#012;min-width:120px;"></div>
+      </div>
+      <div style="flex:1;min-height:180px;">
+        <canvas id="analysisChart" height="240"></canvas>
+      </div>
+    </div>
+    <!-- Cross Metrics section -->
+    <div style="padding:12px 16px;border-top:1px dashed #222;">
+      <div style="font-family:'Passion One',cursive;color:#00bfa6;font-size:18px;margin-bottom:8px;">Cross Metrics</div>
+      <div id="crossMetricsContainer" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- CESIUM TOKEN ----------
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4YjliYWYzMS0zZThlLTQ1ZmQtODJkOS02YTQxM2U1ZDdjODciLCJpZCI6MzQzMzMyLCJpYXQiOjE3NTg0NzI4Nzd9.Cbgd76mvyxpQhqQmNewo5j0X73Wf6k1MawLTYOVOiY8";
+
+    // UI helpers
+    function hideLoadingScreen() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      loadingScreen.style.opacity = '0';
+      loadingScreen.style.visibility = 'hidden';
+    }
+
+    // Small transient toast helper (message shown at bottom-center for a few seconds)
+    function showToast(message, timeoutMs = 5000) {
+      try {
+        let el = document.getElementById('globalToast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'globalToast';
+          el.className = 'toast-popup';
+          el.innerHTML = `<div class="toast-icon"></div><div class="toast-text"></div>`;
+          document.body.appendChild(el);
+        }
+        const text = el.querySelector('.toast-text');
+        text.textContent = message || '';
+        // show
+        el.classList.add('show');
+        // clear any existing timer
+        if (el._hideTimer) { clearTimeout(el._hideTimer); el._hideTimer = null; }
+        el._hideTimer = setTimeout(() => {
+          try { el.classList.remove('show'); } catch (e) {}
+        }, timeoutMs);
+      } catch (e) { console.warn('showToast failed', e); }
+    }
+
+    // ---------- VIEWER ----------
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      baseLayerPicker: false,
+      timeline: false,
+      animation: false,
+      // hide common top-right widgets: geocoder (search), home, scene mode picker, nav help
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      // hide fullscreen/vr icons
+      fullscreenButton: false,
+      vrButton: false,
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+      creditContainer: document.createElement('div'),
+      requestRenderMode: true,
+      maximumRenderTimeChange: Infinity
+    });
+
+    // Resize to account for side panel and position the map wrapper
+    function resizeCesiumContainer() {
+      const panel = document.getElementById('dashboardPanel');
+      const wrapper = document.getElementById('cesiumWrapper');
+      const ai = document.getElementById('aiAdvisor');
+      if (panel && wrapper) {
+        wrapper.style.left = (panel.offsetWidth) + 'px';
+      }
+      // if AI advisor is visible on the right, reduce map wrapper right to avoid overlap
+      try {
+        if (ai && ai.style && ai.style.display === 'block') {
+          const aiWidth = ai.offsetWidth || 320;
+          wrapper.style.right = aiWidth + 'px';
+        } else {
+          wrapper.style.right = '0';
+        }
+      } catch (e) {}
+      // trigger Cesium resize if available
+      try { if (viewer && viewer.scene) viewer.resize(); } catch (e) {}
+    }
+
+    // Variables for layers/tilesets
+    let baseImageryLayer = null;
+    let labelsImageryLayer = null;
+    let buildingsTileset = null;
+    const currentAreaLayers = {}; // area -> currently displayed imagery layer
+    // Operation counters to cancel stale async layer loads per area
+    const areaOpCounter = {};
+    let cameraUpdateTimeout = null;
+
+    function scheduleCameraUpdate() {
+      if (cameraUpdateTimeout) clearTimeout(cameraUpdateTimeout);
+      cameraUpdateTimeout = setTimeout(() => {
+        updateCameraToSelectedAreas();
+      }, 200);
+    }
+
+    // Analytics visibility state and helpers
+    let analyticsVisible = false;
+
+    function showAnalytics() {
+      const a = document.getElementById('analyticsWrapper');
+      const wrapper = document.getElementById('cesiumWrapper');
+      if (!a || analyticsVisible) return;
+      // place analytics in bottom half exactly and remove gaps
+      a.style.display = 'block';
+      a.classList.remove('analytics-hidden');
+      a.classList.add('analytics-visible');
+      // set 70/30 split: map 70% height, analytics 30% height
+      if (wrapper) wrapper.style.bottom = '30%';
+      a.style.top = '70%';
+      a.style.bottom = '0';
+      analyticsVisible = true;
+      // ensure layout recalculation
+      setTimeout(() => { try { viewer.resize(); } catch (e) {} }, 100);
+    }
+
+    function hideAnalytics() {
+      const a = document.getElementById('analyticsWrapper');
+      const wrapper = document.getElementById('cesiumWrapper');
+      if (!a || !analyticsVisible) return;
+      a.classList.remove('analytics-visible');
+      a.classList.add('analytics-hidden');
+      // hide analytics completely and expand map to full area (no gaps)
+      a.style.display = 'none';
+      if (wrapper) wrapper.style.bottom = '0';
+      analyticsVisible = false;
+      setTimeout(() => { try { viewer.resize(); } catch (e) {} }, 100);
+    }
+
+    function updateAnalyticsVisibility() {
+      // Show analytics only when a data checkbox is selected and at least one area is checked
+      const dataChecked = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]')).some(cb => cb.checked);
+      const areaChecked = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]')).some(cb => cb.checked);
+      if (dataChecked && areaChecked) showAnalytics(); else hideAnalytics();
+    }
+
+    function updateCameraToSelectedAreas() {
+      try {
+        const checkedAreas = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]'))
+          .filter(cb => cb.checked).map(cb => cb.value);
+        const rectangles = [];
+        for (const a of checkedAreas) {
+          const layer = currentAreaLayers[a];
+          const provider = layer && layer.imageryProvider;
+          const rect = provider && provider.rectangle;
+          if (rect) rectangles.push(rect);
+        }
+        if (!rectangles.length) return;
+        let west = rectangles[0].west, south = rectangles[0].south, east = rectangles[0].east, north = rectangles[0].north;
+        for (let i = 1; i < rectangles.length; i++) {
+          west = Math.min(west, rectangles[i].west);
+          south = Math.min(south, rectangles[i].south);
+          east = Math.max(east, rectangles[i].east);
+          north = Math.max(north, rectangles[i].north);
+        }
+        const union = new Cesium.Rectangle(west, south, east, north);
+        viewer.camera.flyTo({ destination: union, duration: 1.5, easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT });
+      } catch (e) {
+        console.warn('Failed to update camera to selected areas', e);
+      }
+    }
+
+    // MARKER MANAGEMENT: create a single reusable marker entity for click actions
+    let _clickMarkerEntity = null;
+    function clearClickMarker() {
+      try {
+        if (_clickMarkerEntity) {
+          viewer.entities.remove(_clickMarkerEntity);
+          _clickMarkerEntity = null;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function showClickMarker(lon, lat, title, description, colorHex) {
+      clearClickMarker();
+  // Use the dashboard accent color for clear, consistent contrast
+  const accent = '#00bfa6'; // dashboard primary accent
+  // dark stroke for contrast against light or dark basemaps and a pale inner circle for readability
+  const strokeColor = '#012';
+  const inner = '#e6f0ea';
+  const svg = `<?xml version="1.0" encoding="utf-8"?>\n<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'>\n  <defs>\n    <filter id='s' x='-50%' y='-50%' width='200%' height='200%'>\n      <feDropShadow dx='0' dy='1' stdDeviation='2' flood-color='#000' flood-opacity='0.35'/>\n    </filter>\n  </defs>\n  <g filter='url(#s)'>\n    <path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z' fill='${accent}' stroke='${strokeColor}' stroke-width='1.4'/>\n    <circle cx='12' cy='9' r='2.6' fill='${inner}'/>\n  </g>\n</svg>`;
+      const uri = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+      _clickMarkerEntity = viewer.entities.add({
+        id: 'cross-metric-marker',
+        name: title || 'Metric',
+        position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+        billboard: {
+          image: uri,
+          width: 48,
+          height: 48,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          // scaleByDistance can be used if desired to keep icon readable at different zooms
+        },
+        label: {
+          text: title || '',
+          font: '600 13px Poppins, Arial, sans-serif',
+          fillColor: Cesium.Color.fromCssColorString('#e6f0ea'),
+          outlineColor: Cesium.Color.fromCssColorString('#012'),
+          outlineWidth: 2,
+          pixelOffset: new Cesium.Cartesian2(0, 44), // push label below the icon so it doesn't sit under the top nav
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        },
+        description: description || ''
+      });
+      // select the entity so the info box (popup) opens; small delay helps camera fly settle
+      try { viewer.selectedEntity = _clickMarkerEntity; } catch (e) { /* ignore */ }
+      try { if (viewer.scene && viewer.scene.requestRender) viewer.scene.requestRender(); } catch(e){}
+    }
+    // Hide the cross-metric marker if the user clicks elsewhere on the map (outside the marker)
+    try {
+      const _markerClickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      _markerClickHandler.setInputAction(function(click) {
+        try {
+          const picked = viewer.scene.pick(click.position);
+          // If nothing was picked, or the picked item is not our marker entity, clear it
+          if (!picked || !picked.id || picked.id !== _clickMarkerEntity) {
+            clearClickMarker();
+            try { viewer.selectedEntity = undefined; } catch (e) { /* ignore */ }
+            try { if (viewer.scene && viewer.scene.requestRender) viewer.scene.requestRender(); } catch(e){}
+          }
+        } catch (e) { /* ignore */ }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    } catch (e) { /* ignore if Cesium not yet ready */ }
+    // Dynamic assets index: category -> year -> area -> assetId
+    const ASSET_INDEX = { heat:{}, green:{}, housing:{}, light:{}, air:{}, population:{} };
+    const AVAILABLE_YEARS = new Set();
+    const AREAS = new Set();
+    let activeData = null; // currently selected global data type (only one data checkbox allowed)
+    let activeYear = '2024';
+
+    // Add country label & marker
+    function addCountryLabel() {
+      viewer.entities.add({
+        id: 'uae-country-label',
+        name: 'United Arab Emirates',
+        position: Cesium.Cartesian3.fromDegrees(54.37, 24.47, 150000),
+        label: {
+          text: '',
+          font: '24px Arial, sans-serif',
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 3,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -20),
+          translucencyByDistance: new Cesium.NearFarScalar(1.5e6, 1.0, 6e6, 0.0),
+          scaleByDistance: new Cesium.NearFarScalar(1.5e6, 1.2, 6e6, 0.6),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        }
+      });
+    }
+
+    // Removed: dummy addPollutionMarker. Cross-metrics cards will add their own markers when clicked.
+
+    // Add 3D buildings (Cesium Ion asset)
+    async function add3DBuildings() {
+      try {
+        buildingsTileset = await Cesium.Cesium3DTileset.fromIonAssetId(96188);
+        viewer.scene.primitives.add(buildingsTileset);
+        buildingsTileset.style = new Cesium.Cesium3DTileStyle({ color: "color('rgba(150, 150, 150, 0.7)')" });
+        buildingsTileset.maximumScreenSpaceError = 16;
+        console.log('3D Buildings loaded successfully');
+      } catch (error) {
+        console.error('Error loading 3D buildings:', error);
+      }
+    }
+
+    // Smoothly show labels
+    function showMapLabels() {
+      if (labelsImageryLayer) {
+        // Ensure the layer is visible first
+        labelsImageryLayer.show = true;
+        
+        let alpha = labelsImageryLayer.alpha || 0;
+        // If already visible, don't animate
+        if (alpha >= 1) return;
+        
+        const fadeInterval = setInterval(() => {
+          alpha += 0.05;
+          labelsImageryLayer.alpha = alpha;
+          if (alpha >= 1) {
+            clearInterval(fadeInterval);
+          }
+        }, 50);
+      }
+    }
+
+    // Also add this function to force show labels immediately if needed
+    function forceShowMapLabels() {
+      if (labelsImageryLayer) {
+        labelsImageryLayer.show = true;
+        labelsImageryLayer.alpha = 1;
+      }
+    }
+
+    // Wait until globe imagery loads
+    function waitForGlobeToLoad(callback) {
+      const checkLoad = () => {
+        if (viewer.scene.globe && viewer.imageryLayers.get(0) && viewer.imageryLayers.get(0).ready) {
+          callback();
+        } else {
+          setTimeout(checkLoad, 100);
+        }
+      };
+      checkLoad();
+    }
+
+    // Load Chart.js for quick visuals
+    const chartJsScript = document.createElement('script');
+    chartJsScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    document.head.appendChild(chartJsScript);
+
+    // ---------- Cesium Ion COG loader ----------
+    async function addIonCogLayer(assetId, options) {
+      try {
+        const provider = await Cesium.IonImageryProvider.fromAssetId(assetId);
+        const layer = viewer.imageryLayers.addImageryProvider(provider);
+        layer.alpha = (options && options.alpha) || 0.7;
+        layer.show  = (options && options.show) !== undefined ? options.show : false;
+        // keep a reference to the imagery provider
+        layer.imageryProvider = layer.imageryProvider;
+        console.log('Ion COG layer added: asset', assetId);
+        return layer;
+      } catch (e) {
+        console.error('Failed to add Ion COG layer', e);
+        throw e;
+      }
+    }
+
+    // ---------- Assets parsing & UI wiring ----------
+    function normalizeAreaName(areaRaw) {
+      if (!areaRaw) return '';
+      let a = String(areaRaw).trim().toLowerCase();
+      // collapse whitespace to single underscore
+      a = a.replace(/\s+/g, '_');
+      // remove any characters except letters, numbers, underscore and hyphen
+      a = a.replace(/[^a-z0-9_\-]/g, '');
+      // common typos/variants
+      if (a === 'zahiya') return 'zahia';
+      if (a === 'musalla') return 'mussalla';
+      if (a === 'muwalieh_suburb') return 'muwaileh_suburb';
+      return a;
+    }
+
+    function addIndex(category, year, area, assetId) {
+      if (!ASSET_INDEX[category][year]) ASSET_INDEX[category][year] = {};
+      ASSET_INDEX[category][year][area] = assetId;
+      AVAILABLE_YEARS.add(year);
+      AREAS.add(area);
+    }
+
+    function detectFromName(name) {
+      // Try patterns for each category
+      let m;
+  // Heat (MODIS LST Summer)
+  m = name.match(/^(.*?)_MODIS_LST_Summer(2018|2020|2022|2024)_Colored_COG$/i);
+  if (m) return { category:'heat', year:m[2], area: normalizeAreaName(m[1]) };
+
+  // Green (NDVI March)
+  m = name.match(/^(.*?)_ndvi_march(2018|2020|2022|2024)_colored_COG$/i);
+  if (m) return { category:'green', year:m[2], area: normalizeAreaName(m[1]) };
+
+  // Housing (NDBI)
+  m = name.match(/^(.*?)_NDBI_(2018|2020|2022|2024)_Colored_COG$/i);
+  if (m) return { category:'housing', year:m[2], area: normalizeAreaName(m[1]) };
+
+  // Light (VIIRS NTL Colored Median) – area name may not have underscore
+  m = name.match(/^(.*?)(_)?VIIRS_NTL_Colored_Median(2018|2020|2022|2024)_COG$/i);
+  if (m) return { category:'light', year:m[3], area: normalizeAreaName(m[1]) };
+
+  // Air quality (NO2)
+  m = name.match(/^(.*?)_NO2_(2018|2020|2022|2024)_Colored_COG$/i);
+  if (m) return { category:'air', year:m[2], area: normalizeAreaName(m[1]) };
+
+  // Population (WorldPop 2020)
+  m = name.match(/^(.*?)_WorldPop2020_Colored_COG$/i);
+  if (m) return { category:'population', year:'2020', area: normalizeAreaName(m[1]) };
+
+      return null;
+    }
+
+    async function buildAssetIndex() {
+      const resp = await fetch('assets.csv');
+      const text = await resp.text();
+      const lines = text.trim().split(/\r?\n/);
+      // header: id,name,type,dateAdded
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(',');
+        if (parts.length < 3) continue;
+        const id = parts[0].trim();
+        const name = parts[1].trim();
+        const type = parts[2].trim();
+        if (type !== 'IMAGERY') continue;
+        const detected = detectFromName(name);
+        if (!detected) continue;
+        const { category, year, area } = detected;
+        addIndex(category, year, area, Number(id));
+      }
+    }
+
+    // ---------- Dynamic Legend Definitions & Rendering ----------
+    const LEGEND_DEFINITIONS = {
+      heat: {
+        title: 'Heat Data – MODIS LST Summer',
+        palette: ['blue','green','yellow','orange','red'],
+        labels: ['Lowest (cool)', 'Mild temperature', 'Warm', 'Hot', 'Hottest areas']
+      },
+      housing: {
+        title: 'Housing Data – NDBI',
+        palette: ['white','yellow','orange','red'],
+        labels: ['Very low built-up intensity', 'Low urban development', 'Moderate built-up', 'High density built-up (urbanized)']
+      },
+      light: {
+        title: 'Light Data – VIIRS Nighttime Lights',
+        palette: ['black','navy','blue','lime','yellow','orange','red','white'],
+        labels: ['No light detected', 'Very dim light', 'Low brightness', 'Moderate brightness', 'High brightness', 'Very high brightness', 'Extremely bright urban zones', 'Peak light intensity']
+      },
+      air: {
+        title: 'Air Quality Data – TROPOMI NO₂',
+        palette: ['blue','green','yellow','orange','red','darkred'],
+        labels: ['Very low NO₂ concentration', 'Low pollution', 'Moderate pollution', 'High pollution', 'Very high NO₂ concentration', 'Extreme pollution hotspot']
+      },
+      green: {
+        title: 'Vegetation Data – NDVI March',
+        palette: ['brown','yellow','green'],
+        labels: ['No vegetation (bare soil, desert, urban)', 'Sparse/low vegetation', 'Healthy, dense vegetation']
+      },
+      population: {
+        title: 'Population Data – WorldPop 2020',
+        palette: ['#ffffff','#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'],
+        labels: ['0 (no population)', 'Very low population density', 'Low to moderate density', 'Moderate density', 'High density', 'Very high population density (urban core)']
+      }
+    };
+
+    function clearLegend() {
+      const c = document.getElementById('legendContainer');
+      c.innerHTML = '';
+    }
+
+    function renderLegendForDefinition(def) {
+      const container = document.createElement('div');
+      container.className = 'legend-block';
+      const title = document.createElement('div');
+      title.style.fontWeight = '600';
+      title.style.marginBottom = '8px';
+      title.textContent = def.title || '';
+      container.appendChild(title);
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.flexDirection = 'column';
+      row.style.gap = '6px';
+      for (let i = 0; i < def.palette.length; i++) {
+        const color = def.palette[i];
+        const label = def.labels && def.labels[i] ? def.labels[i] : '';
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color';
+        colorBox.style.background = color;
+        colorBox.style.border = (color === 'white' || color === '#ffffff') ? '1px solid #ccc' : 'none';
+        const span = document.createElement('span');
+        span.textContent = label;
+        span.style.fontSize = '13px';
+        item.appendChild(colorBox);
+        item.appendChild(span);
+        row.appendChild(item);
+      }
+      container.appendChild(row);
+      return container;
+    }
+
+    function renderCombinedLegend() {
+      // Show a friendly prompt when no dataset is selected
+      const container = document.getElementById('legendContainer');
+      container.innerHTML = '';
+      const prompt = document.createElement('div');
+      prompt.style.padding = '10px';
+      prompt.style.border = '1px dashed #2c2c40';
+      prompt.style.background = '#161623';
+      prompt.style.color = '#a0a0b0';
+      prompt.style.fontSize = '14px';
+      prompt.style.textAlign = 'center';
+      prompt.textContent = 'Select a data type to view its legend.';
+      container.appendChild(prompt);
+    }
+
+    function renderLegend(activeKey) {
+      const container = document.getElementById('legendContainer');
+      container.innerHTML = '';
+      if (!activeKey) {
+        renderCombinedLegend();
+        return;
+      }
+      const def = LEGEND_DEFINITIONS[activeKey];
+      if (!def) { renderCombinedLegend(); return; }
+      container.appendChild(renderLegendForDefinition(def));
+    }
+
+  // ---------- Analytics loading ----------
+    const DATASET_TO_FILE = {
+      heat: 'export/heat.json',
+      green: 'export/green.json',
+      housing: 'export/housing.json',
+      light: 'export/light.json',
+      air: 'export/air.json',
+      population: 'export/population.json'
+    };
+    const datasetCache = {};
+    const DATASET_META = {};
+    async function loadDataset(category) {
+      if (!category) return null;
+      if (datasetCache[category]) return datasetCache[category];
+      const url = DATASET_TO_FILE[category];
+      try {
+        const r = await fetch(url, { cache: 'no-cache' });
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        const j = await r.json();
+        if (j && j.__meta__) {
+          DATASET_META[category] = j.__meta__;
+        }
+        datasetCache[category] = j;
+        return j;
+      } catch (e) {
+        console.warn('Failed to load dataset', category, e);
+        return null;
+      }
+    }
+
+    let analysisChart = null;
+    function renderChart(labels, values, label, color) {
+      const ctx = document.getElementById('analysisChart').getContext('2d');
+      if (analysisChart) { analysisChart.destroy(); }
+      analysisChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{ label, data: values, backgroundColor: color || 'rgba(0,191,166,0.6)' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#cfd8dc', callback: function(val){ return formatNumber(val, activeData); } }, grid: { color: '#223' } }, x: { ticks: { color: '#cfd8dc' }, grid: { display: false } } }, plugins: { legend: { labels: { color: '#cfd8dc' } } } }
+      });
+    }
+
+    // Format numbers with sensible decimals based on magnitude and dataset
+    function formatNumber(v, category) {
+      if (v === null || v === undefined || Number.isNaN(v)) return '-';
+      const n = Number(v);
+      const abs = Math.abs(n);
+      // For air quality NO2 (very small numbers) show more decimals
+      if (category === 'air') {
+        if (abs === 0) return '0.00';
+        if (abs < 0.0001) return n.toExponential(2);
+        if (abs < 0.01) return n.toFixed(6);
+        if (abs < 1) return n.toFixed(4);
+        return n.toFixed(2);
+      }
+      // Generic formatting
+      if (abs < 1) return n.toFixed(4);
+      if (abs < 100) return n.toFixed(2);
+      return n.toFixed(0);
+    }
+
+    // Return a short, human-friendly unit label derived from the full units string.
+    function shortUnitLabel(units) {
+      if (!units) return '';
+      const u = units.toLowerCase();
+      if (u.includes('ndbi')) return 'NDBI';
+      if (u.includes('ndvi')) return 'NDVI';
+      if (u.includes('°c') || u.includes('celsius') || u.includes('°')) return '°C';
+      if (u.includes('people') || u.includes('people/km') || u.includes('population')) return 'People/km²';
+      if (u.includes('km') && u.includes('built')) return 'km²';
+      if (u.includes('nW') || u.includes('brightness') || u.includes('ntl')) return 'Brightness';
+      // fallback: remove parenthetical notes and use first few words
+      const cleaned = units.replace(/\(.*?\)/g, '').trim();
+      return cleaned.split(/[,;\-–\/]/)[0].trim();
+    }
+
+    // Clean a pre-formatted value text produced by the cross-metrics generator.
+    // Prefer to display a concise numeric + short unit label and remove the word 'unitless' or long parenthetical notes.
+    function cleanValueText(valueText, units) {
+      if (!valueText || typeof valueText !== 'string') return valueText || '';
+      // Try to extract the leading numeric token
+      const m = valueText.match(/^\s*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+      const num = m ? m[1] : null;
+      const short = shortUnitLabel(units);
+      if (num) {
+        return short ? `${num} ${short}` : `${num}`;
+      }
+      // If no numeric prefix, just return the original text but remove any 'unitless' mention
+      return valueText.replace(/\bunitless\b/gi, '').replace(/\s+/g, ' ').trim();
+    }
+
+    // Human-friendly display name for a dataset (short label + optional unit cue)
+    function datasetDisplayName(category, units) {
+      const map = {
+        housing: 'Built-up (NDBI)',
+        // NDVI datasets are for March (peak vegetation)
+        green: 'Vegetation (NDVI) — March (peak vegetation)',
+        // Heat datasets are summer months
+        heat: 'Day LST — Summer months',
+        light: 'Night lights',
+        air: 'NO₂',
+        population: 'Population'
+      };
+      const base = map[category] || (category ? category.charAt(0).toUpperCase()+category.slice(1) : 'Metric');
+    const short = shortUnitLabel(units);
+    if (short && !base.toLowerCase().includes(short.toLowerCase())) {
+      return `${base} (${short})`;
+    }
+    return base;
+      if (short && !base.toLowerCase().includes(short.toLowerCase())) {
+        return `${base} (${short})`;
+      }
+      return base;
+    }
+
+    // Compute percentile of value within an array of numbers (0..1)
+    function computePercentile(arr, value) {
+      if (!Array.isArray(arr) || arr.length === 0 || value === null || value === undefined || Number.isNaN(value)) return null;
+      const nums = arr.filter(n => typeof n === 'number' && !Number.isNaN(n)).slice().sort((a,b) => a-b);
+      if (nums.length === 0) return null;
+      // fraction of values strictly below value
+      let below = 0;
+      for (const n of nums) { if (n < value) below++; }
+      return below / nums.length;
+    }
+
+    // Interpret a dataset value relative to city distribution and dataset semantics
+    function interpretDataset(category, value, allValues) {
+      // allValues: array of numeric means across city areas for given year
+      const p = computePercentile(allValues, value);
+      if (p === null) return null;
+
+      // Category semantic: whether higher value is good or bad
+      const semantics = {
+        air: 'higher_worse',    // higher NO2 is worse
+        heat: 'higher_worse',   // higher temperature increases heat exposure
+        housing: 'higher_worse',// NDBI/housing indicates built area (less green)
+        green: 'higher_better', // NDVI higher is better (more vegetation)
+        light: 'neutral',       // brightness: neutral (indicator of urbanization)
+        population: 'neutral',  // population: neutral (density indicator)
+      };
+      const sem = semantics[category] || 'neutral';
+
+      // category-specific percentile thresholds (tuned per semantics)
+      const thresholds = {
+        higher_worse: [0.25, 0.6], // <=0.25 Good, <=0.6 Moderate, >0.6 Poor
+        higher_better: [0.25, 0.6], // <=0.25 Low, <=0.6 Moderate, >0.6 High
+        neutral: [0.25, 0.6],
+      };
+      const t = thresholds[sem] || [0.25, 0.6];
+
+      let label = '';
+      let advice = '';
+      if (sem === 'higher_worse') {
+        if (p <= t[0]) { label = 'Good'; advice = 'Lower than most of the city — favourable.'; }
+        else if (p <= t[1]) { label = 'Moderate'; advice = 'Around the city average — monitor trends.'; }
+        else { label = 'Poor'; advice = 'High relative to the city — consider mitigation or investigation.'; }
+      } else if (sem === 'higher_better') {
+        if (p <= t[0]) { label = 'Low'; advice = 'Lower vegetation relative to the city — consider greening.'; }
+        else if (p <= t[1]) { label = 'Moderate'; advice = 'Close to city average.'; }
+        else { label = 'High'; advice = 'High vegetation — positive outcome.'; }
+      } else {
+        if (p <= t[0]) { label = 'Low'; advice = 'Lower than most city areas.'; }
+        else if (p <= t[1]) { label = 'Medium'; advice = 'Around the city average.'; }
+        else { label = 'High'; advice = 'Higher than most city areas.'; }
+      }
+
+      // Add a short contextual summary
+  const pct = Math.round(p * 100);
+  const summary = `${label} (${toOrdinal(pct)} percentile)`;
+      return { label, advice, percentile: p, summary };
+    }
+
+    function humanizeArea(a) { return a.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
+
+    function toOrdinal(n) {
+      // n may be number or string; return e.g. '1st', '2nd', '3rd', '11th'
+      const num = Number(n);
+      if (!Number.isFinite(num) || Math.floor(num) !== num) return String(n);
+      const abs = Math.abs(num);
+      const rem100 = abs % 100;
+      if (rem100 >= 11 && rem100 <= 13) return num + 'th';
+      switch (abs % 10) {
+        case 1: return num + 'st';
+        case 2: return num + 'nd';
+        case 3: return num + 'rd';
+        default: return num + 'th';
+      }
+    }
+
+    function updateAnalyticsText(category, year, areas, statsByArea, units, cityAllValues) {
+      const el = document.getElementById('analysisText');
+      const meta = document.getElementById('analysisMeta');
+      if (!category) {
+        el.textContent = 'Select areas and a data type to view statistics and trends.';
+        meta.textContent = '';
+        return;
+      }
+      if (!areas.length) {
+        el.textContent = 'Select one or more areas to view '+category+' statistics.';
+        meta.textContent = '';
+        return;
+      }
+      const available = areas.filter(a => statsByArea[a]);
+      if (!available.length) {
+        el.textContent = 'No data available for the current selection ('+category+' '+year+').';
+        meta.textContent = '';
+        return;
+      }
+
+      // helper: pick the appropriate numeric value per-area
+      function getAreaValue(areaKey) {
+        const s = statsByArea[areaKey];
+        if (!s) return NaN;
+        // for the light dataset prefer median if available, otherwise fall back to mean
+        if (category === 'light' && Number.isFinite(s.median)) return s.median;
+        if (Number.isFinite(s.mean)) return s.mean;
+        return NaN;
+      }
+
+  // compute per-area representative values (median for light where present, else mean)
+  const means = available.map(a => getAreaValue(a)).filter(v => Number.isFinite(v));
+  const cityMean = means.length ? (means.reduce((s,v)=>s+v,0)/means.length) : null;
+  // show a human-friendly dataset name (including small notes like 'March' or 'Summer')
+  let sentence = datasetDisplayName(category, units) + " in " + year + ": ";
+  // use wording that reflects the representative statistic (median for light, mean otherwise)
+  const repStatLabel = (category === 'light') ? 'median' : 'average';
+  if (cityMean !== null) sentence += repStatLabel + " across selected areas = " + formatNumber(cityMean, category) + (units?(' '+units):'') + ". ";
+      // If only a single area is selected (or only one area has data), present its value plainly
+      const availableWithValues = available.filter(a => Number.isFinite(getAreaValue(a)));
+      if (availableWithValues.length === 1) {
+        const only = availableWithValues[0];
+        const val = getAreaValue(only);
+        if (Number.isFinite(val)) {
+          // use 'mean' wording for consistency with metadata (use 'median' label already embedded in repStatLabel variable)
+          const singleStatLabel = (category === 'light') ? 'median' : 'mean';
+          sentence = datasetDisplayName(category, units) + " in " + year + ": " + singleStatLabel + " for " + humanizeArea(only) + " = " + formatNumber(val, category) + (units?(' '+units):'') + ".";
+        } else {
+          sentence = 'No numeric measurements available for the selected area.';
+        }
+      } else if (availableWithValues.length > 1) {
+        // extremes only among areas with finite means
+        const extremes = availableWithValues.slice().sort((a,b) => (getAreaValue(b) - getAreaValue(a)));
+        const top = extremes[0];
+        const bottom = extremes[extremes.length-1];
+        sentence += humanizeArea(top) + " highest" + (Number.isFinite(getAreaValue(top)) ? " (" + formatNumber(getAreaValue(top), category) + (units?(' '+units):'') + ")" : "") + "; ";
+        if (bottom !== top) sentence += humanizeArea(bottom) + " lowest" + (Number.isFinite(getAreaValue(bottom)) ? " (" + formatNumber(getAreaValue(bottom), category) + (units?(' '+units):'') + ")" : "") + ".";
+      } else {
+        sentence += 'No numeric measurements available for the selected areas.';
+      }
+      el.textContent = sentence;
+      // Build an assessment per selected area and overall
+  let assessmentText = '';
+      if (means.length) {
+        // Interpret each selected area and include up to 3 top/bottom summaries
+        const assessments = available.map(a => {
+          const st = statsByArea[a];
+          const val = getAreaValue(a);
+          const interp = interpretDataset(category, val, cityAllValues || means);
+          return { area: a, mean: val, interp };
+        }).filter(x => x.interp !== null);
+
+        // If single area selected, show its detailed advice, otherwise show city-level extremes and brief advice
+        if (assessments.length === 1) {
+          const it = assessments[0].interp;
+          assessmentText = it.summary + ' — ' + it.advice;
+        } else if (assessments.length > 1) {
+          // city-level: show average percentile across selected areas
+          const percentiles = assessments.map(a => a.interp.percentile).filter(p=>p!==null);
+          const avgP = percentiles.length ? (percentiles.reduce((s,v)=>s+v,0)/percentiles.length) : null;
+          if (avgP !== null) {
+            // nothing to do here, but left intentionally for future extension
+          }
+          // include top and bottom areas
+          const sorted = assessments.slice().sort((a,b) => (b.mean||0)-(a.mean||0));
+          const top = sorted[0];
+          const bottom = sorted[sorted.length-1];
+          let topStr = '';
+          let bottomStr = '';
+          if (top) topStr = humanizeArea(top.area) + ' (' + (Number.isFinite(top.mean) ? formatNumber(top.mean, category) : '-') + (units?(' '+units):'') + ')';
+          if (bottom) bottomStr = humanizeArea(bottom.area) + ' (' + (Number.isFinite(bottom.mean) ? formatNumber(bottom.mean, category) : '-') + (units?(' '+units):'') + ')';
+          assessmentText = 'Top: ' + topStr + '; Bottom: ' + bottomStr + '. ';
+          // Add concise advice aggregated from extremes
+          const topInterp = top.interp; const bottomInterp = bottom.interp;
+          if (topInterp && topInterp.advice) assessmentText += topInterp.advice + ' ';
+        }
+      }
+
+  // indicate whether the stats represent mean or median (light uses median when available)
+  const repLabel = (category === 'light') ? 'median' : 'mean';
+  meta.textContent = 'Stats show ' + repLabel + ' values by area. Units: '+(units||'N/A') + (areas.length ? ('; selected: ' + areas.length + ', with data: ' + means.length) : '');
+      const assessEl = document.getElementById('analysisAssessment');
+      if (assessmentText) {
+        // Determine background color in a dataset-aware way so "high/low" are interpreted according to dataset semantics
+        const summary = assessmentText.toLowerCase();
+        let bg = '#eee'; let fg = '#012';
+        // dataset semantics: whether higher is good or bad
+        const semantics = {
+          air: 'higher_worse',    // higher NO2 is worse
+          heat: 'higher_worse',
+          housing: 'higher_worse',
+          green: 'higher_better', // NDVI higher is better
+          light: 'neutral',
+          population: 'neutral'
+        };
+        const sem = semantics[category] || 'neutral';
+
+        // positive / good -> green
+        if (summary.includes('good') || summary.includes('positive')) {
+          bg = '#d1f7e7'; fg = '#013';
+        }
+        // explicit 'poor' or 'consider' phrasing -> red
+        else if (summary.includes('poor') || summary.includes('consider') || summary.includes('bottom')) {
+          bg = '#ffd6d6'; fg = '#400';
+        }
+        // moderate / average -> yellow
+        else if (summary.includes('moderate') || summary.includes('medium') || summary.includes('around the city average')) {
+          bg = '#fff4cc'; fg = '#332a00';
+        }
+        // handle 'high' / 'highest' in a semantics-aware way
+        else if (summary.includes('high') || summary.includes('highest')) {
+          if (sem === 'higher_better') { bg = '#d1f7e7'; fg = '#013'; } // e.g., NDVI: high is good
+          else if (sem === 'higher_worse') { bg = '#ffd6d6'; fg = '#400'; } // e.g., NO2: high is bad
+          else { bg = '#fff4cc'; fg = '#332a00'; }
+        }
+        // handle 'low' / 'lowest' in a semantics-aware way
+        else if (summary.includes('low') || summary.includes('lowest')) {
+          if (sem === 'higher_worse') { bg = '#d1f7e7'; fg = '#013'; } // e.g., NO2: low is good
+          else if (sem === 'higher_better') { bg = '#ffd6d6'; fg = '#400'; } // e.g., NDVI: low is bad
+          else { bg = '#fff4cc'; fg = '#332a00'; }
+        }
+
+        assessEl.style.background = bg;
+        assessEl.style.color = fg;
+        assessEl.textContent = assessmentText;
+      } else {
+        assessEl.style.background = 'transparent';
+        assessEl.textContent = '';
+      }
+    }
+
+    async function refreshAnalytics() {
+      if (!activeData) { updateAnalyticsText(null, null, [], {}, ''); renderChart([], [], '', undefined); return; }
+      const ds = await loadDataset(activeData);
+      if (!ds) { updateAnalyticsText(activeData, activeYear, [], {}, ''); renderChart([], [], '', undefined); return; }
+      const byYear = ds[activeYear] || {};
+      const meta = DATASET_META[activeData] || null;
+      const cityAllValues = (meta && meta.city_means && meta.city_means[activeYear]) ? meta.city_means[activeYear] : null;
+      const checkedAreas = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]'))
+        .filter(cb => cb.checked).map(cb => cb.value);
+      const labels = [];
+      const values = [];
+      const statsByArea = {};
+      let units = '';
+      for (const a of checkedAreas) {
+        const stat = byYear[a];
+        if (!stat) continue;
+        statsByArea[a] = stat;
+        // include sample count in label when available
+        const count = (stat && typeof stat.n === 'number') ? stat.n : null;
+        labels.push(humanizeArea(a) + (count !== null ? ` (n=${count})` : ''));
+  // For light dataset prefer median if present, otherwise fall back to mean
+  const repVal = (activeData === 'light' && typeof stat.median === 'number' && Number.isFinite(stat.median)) ? stat.median : ((typeof stat.mean === 'number' && Number.isFinite(stat.mean)) ? stat.mean : null);
+  values.push(repVal);
+        if (stat.units && !units) units = stat.units;
+      }
+      updateAnalyticsText(activeData, activeYear, checkedAreas, statsByArea, units, cityAllValues);
+  const chartLabel = datasetDisplayName(activeData, units) + ' (' + ((activeData === 'light') ? 'median' : 'mean') + ')' + (units?(' ['+units+']') : '');
+  renderChart(labels, values, chartLabel, 'rgba(0,191,166,0.6)');
+      // Also refresh cross metrics display
+      try { renderCrossMetricsFor(activeData, activeYear, checkedAreas); } catch (e) { console.warn('Cross metrics render failed', e); }
+    }
+
+    function populateAreasList() {
+      const list = document.getElementById('areasList');
+      list.innerHTML = '';
+      const areasArr = Array.from(AREAS).sort();
+      for (const a of areasArr) {
+        const id = `area_${a}`;
+        const row = document.createElement('div');
+        row.className = 'checkbox-item';
+        const input = document.createElement('input');
+        input.type = 'checkbox'; input.id = id; input.value = a;
+        input.addEventListener('change', () => onAreaToggle(a, input.checked));
+        const label = document.createElement('label');
+        label.htmlFor = id; label.textContent = a.replace(/_/g, ' ');
+        row.appendChild(input); row.appendChild(label);
+        list.appendChild(row);
+      }
+    }
+
+    function syncYearSliderForData() {
+      const slider = document.getElementById('yearSlider');
+      const yearValue = document.getElementById('yearValue');
+      if (activeData === 'population') {
+        slider.value = '2020';
+        slider.disabled = true; // baseline only
+        yearValue.textContent = '2020';
+        activeYear = '2020';
+      } else {
+        slider.disabled = false;
+        // Ensure the current slider value exists for selected data; if not, snap to nearest available
+        const years = Object.keys(ASSET_INDEX[activeData] || {});
+        if (years.length) {
+          let y = parseInt(slider.value, 10);
+          if (!ASSET_INDEX[activeData][String(y)]) {
+            // pick closest available year
+            const sorted = years.map(Number).sort((a,b)=>a-b);
+            let closest = sorted[0];
+            for (const v of sorted) { if (Math.abs(v - y) < Math.abs(closest - y)) closest = v; }
+            slider.value = String(closest);
+            yearValue.textContent = String(closest);
+            activeYear = String(closest);
+          }
+        }
+      }
+    }
+
+    async function onAreaToggle(area, checked) {
+      // bump op id to invalidate any in-flight loads for this area
+      areaOpCounter[area] = (areaOpCounter[area] || 0) + 1;
+      const myOp = areaOpCounter[area];
+      // helper to check if this op is still current
+      const isCurrentOp = () => areaOpCounter[area] === myOp;
+      try {
+        if (!checked) {
+          if (currentAreaLayers[area]) {
+            viewer.imageryLayers.remove(currentAreaLayers[area], true);
+            currentAreaLayers[area] = null;
+          }
+          return;
+        }
+        if (!activeData) return; // no data selected yet
+        const desiredAssetId = ASSET_INDEX[activeData]?.[activeYear]?.[area];
+        if (!desiredAssetId) return;
+        // ensure only one layer per area
+        if (currentAreaLayers[area]) {
+          viewer.imageryLayers.remove(currentAreaLayers[area], true);
+          currentAreaLayers[area] = null;
+        }
+        const layer = await addIonCogLayer(desiredAssetId, { alpha: 0.75, show: true });
+        // If a newer op started meanwhile, discard this layer immediately
+        const checkboxStillChecked = (() => {
+          const el = document.getElementById(`area_${area}`);
+          return !!(el && el.checked);
+        })();
+        if (!isCurrentOp() || !checkboxStillChecked || desiredAssetId !== (ASSET_INDEX[activeData]?.[activeYear]?.[area])) {
+          try { viewer.imageryLayers.remove(layer, true); } catch (_) {}
+          return;
+        }
+        currentAreaLayers[area] = layer;
+        viewer.imageryLayers.raiseToTop(layer);
+      } catch (e) {
+        console.error('Area toggle failed', e);
+      } finally {
+        // keep analytics in sync with area selection changes
+        refreshAnalytics();
+        updateAnalyticsVisibility();
+        scheduleCameraUpdate();
+      }
+    }
+
+    function onDataToggle(targetCheckbox) {
+      const checkboxes = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]'));
+      if (targetCheckbox.checked) {
+        // Enforce single selection: uncheck others (do not disable)
+        checkboxes.forEach(cb => { if (cb !== targetCheckbox) cb.checked = false; });
+        activeData = targetCheckbox.value;
+        // cancel any in-flight area operations from previous data
+        Object.keys(currentAreaLayers).forEach(a => { areaOpCounter[a] = (areaOpCounter[a] || 0) + 1; });
+        syncYearSliderForData();
+        // Rebuild layers for checked areas using the new data
+        const areaCheckboxes = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]'));
+        areaCheckboxes.forEach(cb => {
+          if (cb.checked) {
+            onAreaToggle(cb.value, true);
+          } else if (currentAreaLayers[cb.value]) {
+            viewer.imageryLayers.remove(currentAreaLayers[cb.value], true);
+            currentAreaLayers[cb.value] = null;
+          }
+        });
+        updateAnalyticsVisibility();
+      } else {
+        // If unchecking the active data, remove all its layers across areas
+        if (activeData === targetCheckbox.value) {
+          // cancel in-flight ops
+          Object.keys(currentAreaLayers).forEach(a => { areaOpCounter[a] = (areaOpCounter[a] || 0) + 1; });
+          Object.keys(currentAreaLayers).forEach(area => {
+            if (currentAreaLayers[area]) {
+              viewer.imageryLayers.remove(currentAreaLayers[area], true);
+              currentAreaLayers[area] = null;
+            }
+          });
+          activeData = null;
+          syncYearSliderForData();
+          scheduleCameraUpdate();
+          updateAnalyticsVisibility();
+        }
+      }
+    }
+
+    function onYearChange(y) {
+      activeYear = String(y);
+      document.getElementById('yearValue').textContent = activeYear;
+      if (!activeData) return;
+      // Update layers for all checked areas to the new year
+      const areaCheckboxes = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]'));
+      areaCheckboxes.forEach(async (cb) => {
+        if (!cb.checked) return;
+        const area = cb.value;
+        // start a new op for this area
+        areaOpCounter[area] = (areaOpCounter[area] || 0) + 1;
+        const myOp = areaOpCounter[area];
+        const isCurrentOp = () => areaOpCounter[area] === myOp;
+        const desiredAssetId = ASSET_INDEX[activeData]?.[activeYear]?.[area];
+        if (!desiredAssetId) return;
+        if (currentAreaLayers[area]) {
+          viewer.imageryLayers.remove(currentAreaLayers[area], true);
+          currentAreaLayers[area] = null;
+        }
+        const layer = await addIonCogLayer(desiredAssetId, { alpha: 0.75, show: true });
+        const checkboxStillChecked = (() => {
+          const el = document.getElementById(`area_${area}`);
+          return !!(el && el.checked);
+        })();
+        if (!isCurrentOp() || !checkboxStillChecked || desiredAssetId !== (ASSET_INDEX[activeData]?.[activeYear]?.[area])) {
+          try { viewer.imageryLayers.remove(layer, true); } catch (_) {}
+          return;
+        }
+        currentAreaLayers[area] = layer;
+        viewer.imageryLayers.raiseToTop(layer);
+      });
+      scheduleCameraUpdate();
+      // year change may affect analytics (different available data)
+      refreshAnalytics();
+      updateAnalyticsVisibility();
+    }
+
+// Enhanced loading screen with progressive status updates
+let loadingProgress = 0;
+const loadingSteps = [
+  "Initializing environment...",
+  "Loading Cesium engine...", 
+  "Connecting to NASA data sources...",
+  "Preparing 3D visualization...",
+  "Getting ready for flight to UAE...",
+  "Almost there..."
+];
+
+function updateLoadingStatus(step) {
+  const statusEl = document.getElementById('loadingStatus');
+  const progressFill = document.querySelector('.progress-fill');
+  
+  if (statusEl) {
+    statusEl.textContent = loadingSteps[step] || "Finalizing...";
+  }
+  
+  if (progressFill) {
+    const progress = Math.min(100, (step / loadingSteps.length) * 100);
+    progressFill.style.width = progress + '%';
+  }
+}
+
+function hideLoadingScreen() {
+  const loadingScreen = document.getElementById('loadingScreen');
+  loadingScreen.style.opacity = '0';
+  loadingScreen.style.visibility = 'hidden';
+}
+
+// Enhanced initialization sequence
+(async function init() {
+  resizeCesiumContainer();
+  window.addEventListener('resize', resizeCesiumContainer);
+
+  // Start progressive loading updates
+  updateLoadingStatus(0);
+  
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(0, 0, 25000000),
+    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 }
+  });
+
+  // Remove default base layer then add a nicer imagery
+  viewer.imageryLayers.removeAll();
+  
+  updateLoadingStatus(1);
+  
+  try {
+    baseImageryLayer = viewer.imageryLayers.addImageryProvider(await Cesium.IonImageryProvider.fromAssetId(2));
+  } catch (e) {
+    console.warn('Bing aerial not available, falling back to OSM', e);
+    baseImageryLayer = viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+      url: 'https://a.tile.openstreetmap.org/'
+    }));
+  }
+
+  updateLoadingStatus(2);
+
+  // Optional: add labels imagery
+  try {
+    labelsImageryLayer = viewer.imageryLayers.addImageryProvider(await Cesium.IonImageryProvider.fromAssetId(3));
+    labelsImageryLayer.alpha = 0;
+  } catch (e) {
+    console.warn('Labels imagery not added', e);
+  }
+
+  updateLoadingStatus(3);
+
+  // Add buildings + UI entities
+  await add3DBuildings();
+  addCountryLabel();
+
+  updateLoadingStatus(4);
+
+  // Wait until globe imagery is ready
+  waitForGlobeToLoad(() => {
+    updateLoadingStatus(5);
+    
+    // Hide loading screen immediately when globe is ready
+    hideLoadingScreen();
+    
+    // Start the flight animation AFTER loading screen is gone
+    setTimeout(() => {
+      // Smooth camera flights to UAE
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(54.37, 24.47, 5000000),
+        orientation: { heading: Cesium.Math.toRadians(0), pitch: Cesium.Math.toRadians(-70), roll: 0 },
+        duration: 7,
+        easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
+        complete: function () {
+          viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(54.37, 24.47, 800000),
+            orientation: { heading: Cesium.Math.toRadians(0), pitch: Cesium.Math.toRadians(-85), roll: 0 },
+            duration: 4,
+            easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
+            complete: function() {
+              showMapLabels();
+              setTimeout(() => {
+                viewer.camera.flyTo({
+                  destination: Cesium.Cartesian3.fromDegrees(54.37, 24.47, 750000),
+                  orientation: { heading: Cesium.Math.toRadians(0), pitch: Cesium.Math.toRadians(-89), roll: 0 },
+                  duration: 1.5,
+                  easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
+                  complete: function() {
+                    try {
+                      // Select all area checkboxes
+                      const areaCbs = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]'));
+                      areaCbs.forEach(cb => { cb.checked = true; });
+
+                      // Activate the Heat dataset
+                      const heatCb = document.getElementById('data_heat');
+                      if (heatCb) {
+                        heatCb.checked = true;
+                        heatCb.dispatchEvent(new Event('change', { bubbles: true }));
+                        try { showToast('All areas and Heat dataset selected by default. You can change this from the left panel.'); } catch (e) {}
+                      }
+                    } catch (e) {
+                      console.warn('Auto-selection after flight failed', e);
+                    }
+                  }
+                });
+              }, 500);
+            }
+          });
+        }
+      });
+    }, 500); // Short delay after loading screen hides
+    
+    // Ensure labels are always visible
+    setTimeout(() => {
+      forceShowMapLabels();
+    }, 3000); // Reduced from 8000 to 3000
+  });
+
+  // Build assets index and populate UI
+  await buildAssetIndex();
+  populateAreasList();
+  
+  // Data checkbox handlers
+  Array.from(document.querySelectorAll('#dataList input[type="checkbox"]'))
+    .forEach(cb => cb.addEventListener('change', () => { onDataToggle(cb); renderLegend(cb.checked ? cb.value : null); refreshAnalytics(); }));
+  // Ensure analytics visibility is correct on init
+  updateAnalyticsVisibility();
+  // Year slider handler
+  // Debounced slider input to avoid UI stalls; 'change' commits immediately
+  (function() {
+    const slider = document.getElementById('yearSlider');
+    let debounceTimer = null;
+    slider.addEventListener('input', (e) => {
+      // update visible year immediately
+      document.getElementById('yearValue').textContent = e.target.value;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        onYearChange(e.target.value);
+        refreshAnalytics();
+        debounceTimer = null;
+      }, 150);
+    });
+    // ensure final value applies on mouseup/keyboard commit
+    slider.addEventListener('change', (e) => { onYearChange(e.target.value); refreshAnalytics(); });
+  })();
+  document.getElementById('yearValue').textContent = document.getElementById('yearSlider').value;
+  // initial legend
+  renderLegend(null);
+})();
+
+    // ---------- Predictions modal UI ----------
+    // inject modal HTML
+    (function createPredictionsModal() {
+      const modalHtml = `
+      <div id="predictionsModal" style="position:fixed;left:320px;right:0;top:0;bottom:0;background:rgba(0,0,0,0.6);display:none;z-index:2000;align-items:center;justify-content:center;">
+        <div style="width:880px;max-width:calc(100% - 40px);height:80%;background:#0f0f1a;color:#e6f0ea;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #222;">
+            <div style="font-weight:700;color:#00bfa6;font-family:'Passion One',cursive;">Future Predictions (2026, 2028, 2030)</div>
+            <div><button id="closePredictionsBtn" style="background:transparent;border:1px solid #2c2c40;color:#cfd8dc;padding:6px 10px;border-radius:6px;cursor:pointer">Close</button></div>
+          </div>
+          <div style="display:flex;gap:12px;flex:1;overflow:hidden;padding:12px;">
+            <div style="width:280px;min-width:220px;overflow:auto;padding-right:8px;border-right:1px solid #222;">
+              <div style="margin-bottom:8px;font-size:13px;color:#cfd8dc">Dataset</div>
+              <select id="predDatasetSelect" style="width:100%;padding:8px;background:#161623;border:1px solid #2c2c40;color:#e6f0ea;border-radius:6px;margin-bottom:12px"></select>
+              <div style="margin-bottom:8px;font-size:13px;color:#cfd8dc">Area</div>
+              <select id="predAreaSelect" style="width:100%;padding:8px;background:#161623;border:1px solid #2c2c40;color:#e6f0ea;border-radius:6px;margin-bottom:12px"></select>
+              <div style="margin-bottom:8px;font-size:13px;color:#cfd8dc">Options</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="font-size:13px;color:#a0a0b0"><input id="predShowHistory" type="checkbox" checked style="margin-right:8px"> Show history</label>
+                <label style="font-size:13px;color:#a0a0b0"><input id="predShowTrend" type="checkbox" checked style="margin-right:8px"> Show trend & R²</label>
+              </div>
+              <div style="margin-top:12px;font-size:12px;color:#9aa7b2">Predictions are generated from CSV history (linear fit). For short series, results are approximate.</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-left:12px;overflow:auto;">
+              <div id="predSummary" style="font-size:14px;color:#cfd8dc;font-weight:600"></div>
+              <div id="predChartWrapper" style="flex:1;min-height:180px;">
+                <canvas id="predChart" style="width:100%;height:100%"></canvas>
+              </div>
+              <div id="predTableWrapper" style="max-height:180px;overflow:auto;border-top:1px dashed #222;padding-top:8px">
+                <table id="predTable" style="width:100%;border-collapse:collapse;font-size:13px;color:#cfd8dc">
+                  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #222">Year</th><th style="text-align:right;padding:6px 8px;border-bottom:1px solid #222">Value</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+      const div = document.createElement('div');
+      div.innerHTML = modalHtml;
+      document.body.appendChild(div.firstElementChild);
+    })();
+
+    let predictionsData = null;
+    let predChart = null;
+
+    async function loadPredictions() {
+      if (predictionsData) return predictionsData;
+      try {
+        const r = await fetch('export/predictions.json', { cache: 'no-cache' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        predictionsData = await r.json();
+        return predictionsData;
+      } catch (e) {
+        console.warn('Failed to load predictions', e);
+        predictionsData = null;
+        return null;
+      }
+    }
+
+    function populateDatasetSelect() {
+      const sel = document.getElementById('predDatasetSelect');
+      sel.innerHTML = '';
+      if (!predictionsData) return;
+      const keys = Object.keys(predictionsData).sort();
+      const opt = document.createElement('option'); opt.value=''; opt.textContent='-- select dataset --'; sel.appendChild(opt);
+      for (const k of keys) {
+        const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o);
+      }
+    }
+
+    function populateAreaSelect(datasetKey) {
+      const sel = document.getElementById('predAreaSelect');
+      sel.innerHTML = '';
+      if (!predictionsData || !datasetKey) return;
+      const areas = Object.keys(predictionsData[datasetKey]).sort();
+      const opt = document.createElement('option'); opt.value=''; opt.textContent='-- select area --'; sel.appendChild(opt);
+      for (const a of areas) {
+        const o = document.createElement('option'); o.value = a; o.textContent = a.replace(/_/g,' '); sel.appendChild(o);
+      }
+    }
+
+    function renderPredictionFor(datasetKey, areaKey) {
+      const summaryEl = document.getElementById('predSummary');
+      const tbody = document.querySelector('#predTable tbody');
+      tbody.innerHTML = '';
+      if (!predictionsData || !datasetKey || !areaKey) { summaryEl.textContent = ''; if (predChart) { predChart.destroy(); predChart = null; } return; }
+      const record = predictionsData[datasetKey][areaKey];
+      if (!record) { summaryEl.textContent = 'No prediction available for selection.'; return; }
+      // units may be stored per-area in the predictions JSON (populated by the generator)
+      const units = (record && record.units) ? record.units : '';
+      // For NDVI (green) and Housing (NDBI) predictions: remove the word 'unitless'
+      // but preserve any useful parenthetical range text. Do not alter other datasets.
+      let displayUnits = units;
+      try {
+        if (displayUnits && (datasetKey === 'green' || datasetKey === 'housing')) {
+          // remove the token 'unitless' from within parentheses while keeping other notes
+          displayUnits = displayUnits.replace(/\(([^)]*)\)/, function(_, inner) {
+            const parts = inner.split(/;|,/).map(s => s.trim()).filter(p => p && !/^unitless$/i.test(p));
+            return parts.length ? `(${parts.join('; ')})` : '';
+          }).replace(/\s+/g, ' ').trim();
+          // clean up leftover whitespace and stray punctuation
+          displayUnits = displayUnits.replace(/\(\s*\)/g, '').replace(/\s+;\s+/g, '; ').trim();
+        }
+      } catch (e) { /* keep original units on any failure */ displayUnits = units; }
+      const hist = record.history || {};
+      const pred = record.prediction || null;
+      const showHistory = document.getElementById('predShowHistory').checked;
+      // build table rows: history then predicted years
+      if (showHistory) {
+        for (const y of Object.keys(hist).sort()) {
+          const tr = document.createElement('tr');
+          const th = document.createElement('td'); th.style.padding='6px 8px'; th.style.color='#9aa7b2'; th.textContent = y; tr.appendChild(th);
+          const td = document.createElement('td'); td.style.padding='6px 8px'; td.style.textAlign='right';
+          if (typeof hist[y] === 'number') td.textContent = hist[y].toFixed(6) + (displayUnits ? (' ' + displayUnits) : ''); else td.textContent = '-';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }
+      }
+      if (pred && pred.predictions) {
+        for (const y of Object.keys(pred.predictions).sort()) {
+          const tr = document.createElement('tr');
+          const th = document.createElement('td'); th.style.padding='6px 8px'; th.style.color='#00bfa6'; th.textContent = y; tr.appendChild(th);
+          const td = document.createElement('td'); td.style.padding='6px 8px'; td.style.textAlign='right';
+          const v = pred.predictions[y]; td.textContent = (typeof v === 'number') ? (Number(v).toFixed(6) + (displayUnits ? (' ' + displayUnits) : '')) : '-';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }
+      }
+
+      // summary
+      let s = `${datasetKey} · ${areaKey.replace(/_/g,' ')} `;
+  if (displayUnits) s += `· units: ${displayUnits} `;
+      if (pred && pred.trend) s += `· trend: ${pred.trend}`;
+      if (pred && typeof pred.r2 === 'number') s += ` · R²=${pred.r2.toFixed(3)}`;
+      summaryEl.textContent = s;
+
+      // chart
+      const ctx = document.getElementById('predChart').getContext('2d');
+      const labels = [];
+      const values = [];
+      if (showHistory) {
+        for (const y of Object.keys(hist).sort()) { labels.push(y); values.push(hist[y]); }
+      }
+      if (pred && pred.predictions) {
+        for (const y of Object.keys(pred.predictions).sort()) { labels.push(y); values.push(pred.predictions[y]); }
+      }
+      if (predChart) { try { predChart.destroy(); } catch(e){} predChart = null; }
+  const areaLabel = areaKey.replace(/_/g,' ') + (displayUnits ? (' ['+displayUnits+']') : '');
+      predChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets:[{ label: areaLabel, data: values, borderColor: 'rgba(0,191,166,0.9)', backgroundColor: 'rgba(0,191,166,0.15)', tension:0.3, fill:true }] },
+        options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ color:'#cfd8dc' }, grid:{ color:'#222' } }, x:{ ticks:{ color:'#cfd8dc' } } }, plugins:{ legend:{ display:false } } }
+      });
+    }
+
+    // wire up modal open/close and selects
+    document.getElementById('openPredictionsBtn').addEventListener('click', async () => {
+      const data = await loadPredictions();
+      if (!data) { alert('Predictions not available. Run the generation script first.'); return; }
+      populateDatasetSelect();
+      document.getElementById('predictionsModal').style.display = 'flex';
+    });
+    document.getElementById('closePredictionsBtn').addEventListener('click', () => {
+      document.getElementById('predictionsModal').style.display = 'none';
+    });
+    document.getElementById('predDatasetSelect').addEventListener('change', (e) => {
+      populateAreaSelect(e.target.value);
+    });
+    document.getElementById('predAreaSelect').addEventListener('change', (e) => {
+      const ds = document.getElementById('predDatasetSelect').value;
+      renderPredictionFor(ds, e.target.value);
+    });
+    document.getElementById('predShowHistory').addEventListener('change', () => {
+      const ds = document.getElementById('predDatasetSelect').value;
+      const a = document.getElementById('predAreaSelect').value;
+      renderPredictionFor(ds, a);
+    });
+    document.getElementById('predShowTrend').addEventListener('change', () => {
+      const ds = document.getElementById('predDatasetSelect').value;
+      const a = document.getElementById('predAreaSelect').value;
+      renderPredictionFor(ds, a);
+    });
+
+  // ---------- Cross Metrics UI ----------
+  let crossMetricsData = null;
+  // render token to cancel stale renders and avoid race conditions that caused duplicate cards
+  let _crossMetricsRenderToken = 0;
+    async function loadCrossMetrics() {
+      if (crossMetricsData) return crossMetricsData;
+      try {
+        const r = await fetch('export/cross_metrics.json', { cache: 'no-cache' });
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        crossMetricsData = await r.json();
+        return crossMetricsData;
+      } catch (e) {
+        console.warn('Failed to load cross metrics', e);
+        crossMetricsData = null;
+        return null;
+      }
+    }
+
+    function severityToColor(s) {
+      if (!s) return '#333';
+      if (s === 'green') return '#d1f7e7';
+      if (s === 'yellow') return '#fff4cc';
+      if (s === 'red') return '#ffd6d6';
+      return '#333';
+    }
+
+    async function renderCrossMetricsFor(datasetKey, year, areaKeys) {
+      const container = document.getElementById('crossMetricsContainer');
+      container.innerHTML = '';
+      if (!datasetKey || !year || !Array.isArray(areaKeys) || !areaKeys.length) return;
+      // bump token and capture; any earlier in-flight render should abort
+      const token = ++_crossMetricsRenderToken;
+
+      // show a small spinner while loading
+      const spinnerWrap = document.createElement('div');
+      spinnerWrap.style.display = 'flex';
+      spinnerWrap.style.alignItems = 'center';
+      spinnerWrap.style.gap = '8px';
+      spinnerWrap.style.padding = '8px';
+      const spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+      spinner.style.width = '20px';
+      spinner.style.height = '20px';
+      spinner.style.borderWidth = '3px';
+      const spinnerText = document.createElement('div');
+      spinnerText.style.color = '#cfd8dc';
+      spinnerText.style.fontSize = '13px';
+      spinnerText.textContent = 'Loading cross metrics...';
+      spinnerWrap.appendChild(spinner);
+      spinnerWrap.appendChild(spinnerText);
+      container.appendChild(spinnerWrap);
+
+      const data = await loadCrossMetrics();
+      // if another render started meanwhile, abort this one
+      if (token !== _crossMetricsRenderToken) return;
+      if (!data || !data[year]) {
+        container.innerHTML = '';
+        const msg = document.createElement('div'); msg.style.color = '#9aa7b2'; msg.style.fontSize = '13px'; msg.textContent = 'No cross-metrics available for selected year.';
+        container.appendChild(msg);
+        return;
+      }
+      const yearData = data[year];
+      // dedupe area keys (sometimes duplicates sneak in)
+      const uniqueAreas = Array.from(new Set(areaKeys));
+
+      // build content in a fragment and then append atomically to avoid partial double-appends
+      const frag = document.createDocumentFragment();
+      // we show only metrics relevant to the selected dataset: metrics where datasetKey is either left or right
+      for (const area of uniqueAreas) {
+        const metrics = (yearData[area] || []).slice();
+        if (!metrics.length) continue;
+        // filter relevant metrics and dedupe by metric id
+        const seen = new Set();
+        const filtered = [];
+        for (const m of metrics) {
+          if (m.dataset_a !== datasetKey && m.dataset_b !== datasetKey) continue;
+          if (seen.has(m.id)) continue;
+          seen.add(m.id);
+          filtered.push(m);
+        }
+        if (!filtered.length) continue;
+        // area header
+        const areaHeader = document.createElement('div');
+        areaHeader.style.width = '100%';
+        areaHeader.style.fontSize = '14px';
+        areaHeader.style.color = '#cfd8dc';
+        areaHeader.style.marginTop = '6px';
+        areaHeader.textContent = area.replace(/_/g,' ');
+        frag.appendChild(areaHeader);
+        const row = document.createElement('div');
+        row.style.display = 'flex'; row.style.gap = '12px'; row.style.flexWrap = 'wrap'; row.style.marginBottom = '8px';
+        for (const m of filtered) {
+          const card = document.createElement('div');
+          card.style.minWidth = '220px';
+          card.style.maxWidth = '320px';
+          card.style.background = severityToColor(m.severity);
+          card.style.border = '1px solid rgba(255,255,255,0.04)';
+          card.style.color = '#012';
+          card.style.padding = '10px';
+          card.style.borderRadius = '6px';
+          card.style.boxSizing = 'border-box';
+          // title
+          const t = document.createElement('div'); t.style.fontWeight = '700'; t.style.color = '#012'; t.textContent = m.title; card.appendChild(t);
+          const s = document.createElement('div'); s.style.fontSize = '13px'; s.style.color = '#012'; s.style.marginTop = '6px';
+          // Build a clearer status: include label (from status), percentile and the formatted absolute value for each dataset component
+          try {
+            // Build labels and values using the datasetDisplayName and cleaned, concise value text
+            const labelA = datasetDisplayName(m.dataset_a, m.units_a);
+            const labelB = datasetDisplayName(m.dataset_b, m.units_b);
+            const pctA = (typeof m.percentile_a === 'number') ? (toOrdinal(Math.round(m.percentile_a*100))+' percentile') : '';
+            const pctB = (typeof m.percentile_b === 'number') ? (toOrdinal(Math.round(m.percentile_b*100))+' percentile') : '';
+            // Prefer the formatted strings from JSON; fall back to numeric formatting
+            const rawA = (m.value_a_text && typeof m.value_a_text === 'string') ? m.value_a_text : ((typeof m.value_a === 'number') ? formatNumber(m.value_a, m.dataset_a) : null);
+            const rawB = (m.value_b_text && typeof m.value_b_text === 'string') ? m.value_b_text : ((typeof m.value_b === 'number') ? formatNumber(m.value_b, m.dataset_b) : null);
+            const valueTextA = rawA ? cleanValueText(rawA, m.units_a) : '-';
+            const valueTextB = rawB ? cleanValueText(rawB, m.units_b) : '-';
+            // Natural sentence: "Built-up (NDBI): 0.0570 — 77th percentile; Vegetation (NDVI): 0.0488 — 8th percentile"
+            s.textContent = `${labelA}: ${valueTextA}${pctA ? ` — ${pctA}` : ''}; ${labelB}: ${valueTextB}${pctB ? ` — ${pctB}` : ''}`;
+          } catch (e) {
+            // Fallback: build a compact representation without relying on m.status parsing
+            try {
+              const la = datasetDisplayName(m.dataset_a, m.units_a);
+              const lb = datasetDisplayName(m.dataset_b, m.units_b);
+              const rvA = (m.value_a_text) ? cleanValueText(m.value_a_text, m.units_a) : ((typeof m.value_a === 'number') ? formatNumber(m.value_a, m.dataset_a) : '-');
+              const rvB = (m.value_b_text) ? cleanValueText(m.value_b_text, m.units_b) : ((typeof m.value_b === 'number') ? formatNumber(m.value_b, m.dataset_b) : '-');
+              s.textContent = `${la}: ${rvA}; ${lb}: ${rvB}`;
+            } catch (err) {
+              s.textContent = (m.title || 'Metric');
+            }
+          }
+          card.appendChild(s);
+          const r = document.createElement('div'); r.style.fontSize = '12px'; r.style.color = '#012'; r.style.marginTop = '8px'; r.textContent = m.recommendation; card.appendChild(r);
+          // Click behavior: fly to area and show marker with problem & recommendation
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', async () => {
+            try {
+              // determine target rectangle from loaded imagery layer for the area if available
+              let lon = 54.37, lat = 24.47; // fallback UAE center
+              const layer = currentAreaLayers[area];
+              if (layer && layer.imageryProvider && layer.imageryProvider.rectangle) {
+                const rect = layer.imageryProvider.rectangle;
+                // rectangle center
+                const center = Cesium.Rectangle.center(rect);
+                lon = Cesium.Math.toDegrees(center.longitude);
+                lat = Cesium.Math.toDegrees(center.latitude);
+                // show marker immediately so InfoBox is available on first click
+                const color = severityToColor(m.severity) || '#00bfa6';
+                showClickMarker(lon, lat, m.title, `<strong>${m.title}</strong><br>${m.recommendation}`, color);
+                try { if (viewer.scene && viewer.scene.requestRender) viewer.scene.requestRender(); } catch(e){}
+                // then fly to the rectangle
+                viewer.camera.flyTo({ destination: rect, duration: 1.2, easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT });
+              } else {
+                // If no rectangle, attempt to use area centroid from asset index via ASSET_INDEX
+                try {
+                  // heuristic: if area imagery exists, use provider rectangle center; otherwise use UAE center
+                  // show marker immediately, then do a short fly
+                  const color = severityToColor(m.severity) || '#00bfa6';
+                  showClickMarker(lon, lat, m.title, `<strong>${m.title}</strong><br>${m.recommendation}`, color);
+                  try { if (viewer.scene && viewer.scene.requestRender) viewer.scene.requestRender(); } catch(e){}
+                  viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 400000), duration: 1.2, easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT });
+                } catch (e) {
+                  console.warn('Fly-to fallback failed', e);
+                }
+              }
+            } catch (err) { console.warn('Card click failed', err); }
+          });
+          row.appendChild(card);
+        }
+        frag.appendChild(row);
+      }
+
+      // if another render started during building, abort
+      if (token !== _crossMetricsRenderToken) return;
+      container.innerHTML = '';
+      container.appendChild(frag);
+    }
+
+    // Build a concise plain-text summary of cross-metrics for inclusion in AI prompts
+    async function getCrossMetricsSummary(datasetKey, year, areaKeys) {
+      try {
+        const data = await loadCrossMetrics();
+        if (!data || !data[year]) return null;
+        const yearData = data[year];
+        const uniqueAreas = Array.from(new Set(areaKeys || []));
+        const lines = [];
+        for (const area of uniqueAreas) {
+          const metrics = (yearData[area] || []).slice();
+          if (!metrics.length) continue;
+          // Filter to metrics that involve the selected dataset
+          const relevant = metrics.filter(m => m.dataset_a === datasetKey || m.dataset_b === datasetKey);
+          if (!relevant.length) continue;
+          // For each metric, build a short line
+          for (const m of relevant) {
+            try {
+              const labelA = datasetDisplayName(m.dataset_a, m.units_a);
+              const labelB = datasetDisplayName(m.dataset_b, m.units_b);
+              const valA = (m.value_a_text && typeof m.value_a_text === 'string') ? cleanValueText(m.value_a_text, m.units_a) : (typeof m.value_a === 'number' ? formatNumber(m.value_a, m.dataset_a) : '-');
+              const valB = (m.value_b_text && typeof m.value_b_text === 'string') ? cleanValueText(m.value_b_text, m.units_b) : (typeof m.value_b === 'number' ? formatNumber(m.value_b, m.dataset_b) : '-');
+              const pctA = (typeof m.percentile_a === 'number') ? (Math.round(m.percentile_a*100) + '%') : '';
+              const pctB = (typeof m.percentile_b === 'number') ? (Math.round(m.percentile_b*100) + '%') : '';
+              const rec = (m.recommendation || '').replace(/\s+/g,' ').trim();
+              lines.push(`${area.replace(/_/g,' ')} — ${m.title}: ${labelA}: ${valA}${pctA?(' ['+pctA+']'):''}; ${labelB}: ${valB}${pctB?(' ['+pctB+']'):''}. Rec: ${rec}`);
+            } catch (e) { /* ignore single metric failures */ }
+          }
+        }
+        if (!lines.length) return null;
+        // return as a single block of text
+        return lines.join('\n');
+      } catch (e) {
+        console.warn('Failed to summarise cross-metrics', e);
+        return null;
+      }
+    }
+
+    // ---------- AI Advisor Integration ----------
+    // Show AI Advisor only when at least one area and one data checkbox are selected
+    function updateAIAdvisorVisibility() {
+      const dataChecked = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]')).some(cb => cb.checked);
+      const areaChecked = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]')).some(cb => cb.checked);
+      const el = document.getElementById('aiAdvisor');
+      
+      if (dataChecked && areaChecked) {
+        el.style.display = 'block';
+        updateAIPanelSize();
+      } else {
+        el.style.display = 'none';
+        document.getElementById('aiStatus').textContent = '';
+      }
+      
+      resizeCesiumContainer();
+    }
+
+    // wire AI visibility updates alongside existing visibility updates
+    // augment updateAnalyticsVisibility to also update AI panel
+    const _origUpdateAnalyticsVisibility = updateAnalyticsVisibility;
+    updateAnalyticsVisibility = function() {
+      try { _origUpdateAnalyticsVisibility(); } catch (e) {}
+      try { updateAIAdvisorVisibility(); } catch (e) {}
+    };
+    // ensure initial AI panel state reflects current selections
+    try { updateAIAdvisorVisibility(); } catch (e) {}
+
+    // Recalculate AI advisor sizing on window resize to stay aligned with topNav and analytics
+    window.addEventListener('resize', () => {
+      try { updateAIAdvisorVisibility(); } catch(e) {}
+      try { resizeCesiumContainer(); } catch(e) {}
+    });
+
+
+
+  // fixed token limit for AI requests (keep user from accidentally selecting expensive values)
+  // Use gpt-4o-mini as the primary working model and request ~400 completion tokens
+  const AI_MAX_TOKENS = 800; // completion tokens (approx. output ~400 tokens)
+
+    // Build the AI prompt according to the enriched urban-planning template
+    // This version sends a compact CURRENT_VALUES field (year, area, and key numeric values)
+    function buildAIPrompt(areaName, dataType, currentDataValues, cityComparisonText, crossMetricsText) {
+      const year = activeYear || '';
+      // Extract just the essential numeric data
+      const summary = (currentDataValues && currentDataValues.summary) ? currentDataValues.summary : {};
+      // For the 'light' dataset we prefer median as the representative statistic; otherwise prefer mean then median
+      const meanPresent = (summary.mean !== undefined && summary.mean !== null);
+      const medianPresent = (summary.median !== undefined && summary.median !== null);
+      let repLabel = 'representative';
+      let keyValue = 'No data';
+      if (dataType === 'light') {
+        if (medianPresent) { repLabel = 'median'; keyValue = summary.median; }
+        else if (meanPresent) { repLabel = 'mean'; keyValue = summary.mean; }
+      } else {
+        if (meanPresent) { repLabel = 'mean'; keyValue = summary.mean; }
+        else if (medianPresent) { repLabel = 'median'; keyValue = summary.median; }
+      }
+      const units = summary.units || '';
+      // include any pre-computed interpretation if present (label, advice, percentile)
+      const interp = (currentDataValues && currentDataValues.interp) ? currentDataValues.interp : null;
+      const interpText = interp ? (`Interpretation: ${interp.label || ''} (${Math.round((interp.percentile||0)*100)} percentile) — ${interp.advice || ''}`) : '';
+
+      return `As an urban planning expert using NASA Earth observation data, analyze ${areaName}.
+
+DATA CONTEXT:
+  - Data Type: ${dataType}
+  - Year: ${year}
+  - Representative statistic: ${repLabel}
+  - Current Value: ${keyValue} ${units}
+  - City Comparison: ${cityComparisonText}
+
+CROSS-METRICS SUMMARY:
+${crossMetricsText || 'No cross-metrics available for this selection.'}
+
+Provide recommendations in EXACTLY this format:
+
+  URBAN ANALYSIS:
+  [2-3 sentences about the main urban planning context]
+
+  KEY FINDINGS:
+  [2-3 sentences about the main issues and opportunities]
+
+  RECOMMENDED ACTIONS:
+  1. [Specific action using NASA data]
+  2. [Specific action using NASA data] 
+  3. [Specific action using NASA data]
+
+  STAKEHOLDER ENGAGEMENT:
+  [City departments and community groups to involve]
+
+  DATA SOURCES & MONITORING:
+  [Specific NASA datasets and monitoring protocols]
+
+Keep responses under 300 words. Be concise and practical.
+
+CONTEXT NOTE: ${interpText}
+NOTE ON METRIC: The numeric value above is reported as the dataset ${repLabel} for the selected area and year (e.g., "mean NDVI = 0.1585"). Phrase the problem and recommendations using the term "${repLabel} ${dataType}" where appropriate (for example, "mean NDVI"), not raw pixel-level readings.
+${dataType === 'light' ? 'IMPORTANT: For the "light" (VIIRS Nighttime Lights) dataset, the representative statistic is the median. Always refer to this value as the "median" (for example, "median night-time brightness = 79.62 nW·cm⁻²·sr⁻¹"). Do NOT call it the mean unless explicitly instructed.' : ''}
+
+IMPORTANT: The dashboard's assessment above is the reference for this analysis. Use the provided Interpretation (label, percentile and short advice) as the authoritative qualitative summary when writing KEY FINDINGS and RECOMMENDED ACTIONS. If your technical judgment differs from this interpretation, state the reason in one sentence (e.g., absolute thresholds, data quality, or different metric semantics) and then continue with recommendations.`;
+    }
+
+    // Top-level multi-area prompt builder (moved out of nested scope so UI can call it)
+  async function buildMultiAIPrompt(areasData, dataType, crossMetricsText) {
+      const selected = areasData.map(a => humanizeArea(a.area)).join(', ');
+      
+      // Build comprehensive data summary for urban planning context
+      const areaSummaries = areasData.map(a => {
+        const summary = a.payload?.summary || {};
+        const meanPresent = (summary.mean !== undefined && summary.mean !== null);
+        const medianPresent = (summary.median !== undefined && summary.median !== null);
+        let repLabelA = 'representative';
+        let value = 'No data';
+        if (dataType === 'light') {
+          if (medianPresent) { repLabelA = 'median'; value = summary.median; }
+          else if (meanPresent) { repLabelA = 'mean'; value = summary.mean; }
+        } else {
+          if (meanPresent) { repLabelA = 'mean'; value = summary.mean; }
+          else if (medianPresent) { repLabelA = 'median'; value = summary.median; }
+        }
+        const units = summary.units || '';
+        const comparison = a.cityComparison || '';
+        const interp = a.interp ? (` - ${a.interp.label || ''} (${Math.round((a.interp.percentile||0)*100)}%)`) : '';
+        return `${humanizeArea(a.area)}: ${value} ${units} (${repLabelA}; ${comparison})${interp}`;
+      }).join('\n');
+
+      // Urban planning context based on data type
+      const planningContext = {
+        heat: "urban heat island mitigation and thermal comfort",
+        green: "green infrastructure and urban canopy management", 
+        air: "air quality improvement and pollution control",
+        housing: "sustainable urban development and density planning",
+        light: "urbanization patterns and energy efficiency",
+        population: "population distribution and service planning"
+      }[dataType] || "urban environmental management";
+
+      return `As an expert urban planner working with NASA Earth observation data, conduct a comparative analysis of these areas for ${planningContext}:
+
+SELECTED AREAS: ${selected}
+
+CURRENT DATA (${dataType}):
+${areaSummaries}
+
+CROSS-METRICS SUMMARY:
+${crossMetricsText || 'No cross-metrics available for the selected dataset/areas.'}
+
+Provide a STRATEGIC URBAN PLANNING ANALYSIS in this EXACT format:
+
+COMPARATIVE ANALYSIS:
+[2-3 sentences: Overall comparative assessment of the areas' urban planning challenges and opportunities]
+
+AREA-SPECIFIC STRATEGIES:
+• ${areasData[0]?.area ? humanizeArea(areasData[0].area) : 'Area 1'}: [Specific urban planning intervention with NASA data integration]
+• ${areasData[1]?.area ? humanizeArea(areasData[1].area) : 'Area 2'}: [Specific urban planning intervention with NASA data integration]
+• ${areasData[2]?.area ? humanizeArea(areasData[2].area) : 'Area 3'}: [Specific urban planning intervention with NASA data integration]
+
+CROSS-CUTTING SOLUTIONS:
+1. [Cross-area strategy addressing regional urban planning challenges]
+2. [Policy recommendation for integrated urban management]
+3. [Implementation phasing and timeline suggestion]
+
+IMPLEMENTATION FRAMEWORK:
+• [Primary department]: [Role and responsibility]
+• [Secondary department]: [Role and responsibility] 
+• [Community involvement]: [Public participation approach]
+
+MONITORING & EVALUATION:
+• [Specific NASA dataset]: [How it informs planning decisions]
+• [Monitoring protocol]: [How to track implementation success]
+
+EXPECTED IMPACT:
+• [Measurable improvement in urban indicators]
+• [Timeline for visible results]
+• [Long-term sustainability impact]
+
+Keep response under 500 words. Focus on actionable urban planning strategies that city officials can implement.`;
+    }
+
+    // Render AI plain-text output into clean HTML by splitting into sections based on headings
+    function renderAIResponse(text) {
+      if (!text || !text.trim()) return '<div style="color:#f88">No response from AI</div>';
+      
+      // Simple HTML escape
+      const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      let safe = esc(text);
+      
+      // Convert sections to headings
+      const sections = {
+        'URBAN ANALYSIS:': '🌍 URBAN ANALYSIS',
+        'KEY FINDINGS:': '🔍 KEY FINDINGS',
+        'RECOMMENDED ACTIONS:': '💡 RECOMMENDED ACTIONS',
+        'STAKEHOLDER ENGAGEMENT:': '🤝 STAKEHOLDER ENGAGEMENT',
+        'DATA SOURCES & MONITORING:': '📊 DATA SOURCES & MONITORING',
+        'COMPARATIVE ANALYSIS:': '📈 COMPARATIVE ANALYSIS',
+        'AREA-SPECIFIC STRATEGIES:': '🎯 AREA-SPECIFIC STRATEGIES',
+        'CROSS-CUTTING SOLUTIONS:': '🔄 CROSS-CUTTING SOLUTIONS',
+        'IMPLEMENTATION FRAMEWORK:': '⚙️ IMPLEMENTATION FRAMEWORK',
+        'MONITORING & EVALUATION:': '📋 MONITORING & EVALUATION',
+        'EXPECTED IMPACT:': '📈 EXPECTED IMPACT'
+      };
+      
+      Object.keys(sections).forEach(key => {
+        const regex = new RegExp(key, 'g');
+        safe = safe.replace(regex, `<div style="font-weight:700;color:#00bfa6;margin-top:12px;margin-bottom:6px;">${sections[key]}</div>`);
+      });
+      
+      // Convert numbered lists and bullets
+      safe = safe.replace(/\n(\d+\.)\s+/g, '<br><span style="font-weight:600">$1</span> ');
+      safe = safe.replace(/\n-\s+/g, '<br>• ');
+      safe = safe.replace(/\n\*\s+/g, '<br>• ');
+      
+      // Convert line breaks
+      safe = safe.replace(/\n/g, '<br>');
+      
+      return `<div style="font-size:13px;line-height:1.5;color:#e6f0ea">${safe}</div>`;
+    }
+
+    async function gatherCurrentDataFor(areaKey, dataType) {
+      // Use the same dataset JSONs used by analytics (loadDataset)
+      const ds = await loadDataset(dataType);
+      if (!ds) return { error: 'dataset missing' };
+      const yearBlock = ds[activeYear] || {};
+      const areaStats = yearBlock[areaKey] || null;
+      // Build a compact object with key stats helpful to AI
+      // Extract a small, clean set of fields rather than sending raw JSON
+      function extractKeyValues(stats) {
+        if (!stats || typeof stats !== 'object') return {};
+        const keys = ['mean','median','min','max','n','units','std','variance','p25','p75'];
+        const out = {};
+        for (const k of keys) {
+          if (stats[k] !== undefined) out[k] = stats[k];
+        }
+        // include any additional small numeric fields discovered
+        Object.keys(stats).forEach(k => {
+          if (out[k] !== undefined) return;
+          const v = stats[k];
+          if (typeof v === 'number' && Object.keys(out).length < 12) out[k] = v;
+        });
+        return out;
+      }
+
+  const cleanedStats = extractKeyValues(areaStats || {});
+  const obj = { year: activeYear, area: areaKey, summary: cleanedStats };
+      // city comparison: compare area mean/median to city meta averages when available
+      const meta = DATASET_META[dataType] || null;
+      const cityMeans = meta && meta.city_means && meta.city_means[activeYear] ? meta.city_means[activeYear] : null;
+      let cityComparison = '';
+      if (areaStats && cityMeans && typeof areaStats.mean === 'number' && typeof cityMeans.mean === 'number') {
+        const diff = areaStats.mean - cityMeans.mean;
+  const pct = (cityMeans.mean !== 0) ? ((diff / cityMeans.mean) * 100).toFixed(1) : null;
+  cityComparison = `Area mean=${formatNumber(areaStats.mean, dataType)} vs city mean=${formatNumber(cityMeans.mean, dataType)}` + (pct!==null?` (${pct}% difference)`: '');
+      } else if (areaStats && typeof areaStats.mean === 'number') {
+        cityComparison = `Area mean=${formatNumber(areaStats.mean, dataType)}; city average not available`;
+      } else {
+        cityComparison = 'No numeric area stats available to compare.';
+      }
+      // Compute a lightweight interpretation that mirrors the dashboard semantics so the AI receives
+      // the same qualitative label (Good/Moderate/Poor etc.) the UI shows.
+      let interp = null;
+      try {
+        // pick representative numeric value
+        // For 'light' prefer median, otherwise prefer mean then median
+        let repVal = null;
+        if (dataType === 'light') {
+          if (areaStats && typeof areaStats.median === 'number' && Number.isFinite(areaStats.median)) repVal = areaStats.median;
+          else if (areaStats && typeof areaStats.mean === 'number' && Number.isFinite(areaStats.mean)) repVal = areaStats.mean;
+        } else {
+          if (areaStats && typeof areaStats.mean === 'number' && Number.isFinite(areaStats.mean)) repVal = areaStats.mean;
+          else if (areaStats && typeof areaStats.median === 'number' && Number.isFinite(areaStats.median)) repVal = areaStats.median;
+        }
+        if (repVal !== null && cityMeans) {
+          interp = interpretDataset(dataType, repVal, cityMeans);
+        } else if (repVal !== null) {
+          // fallback: compute percentile against nothing -> just provide basic label using interpretDataset with available values
+          interp = interpretDataset(dataType, repVal, null);
+        }
+      } catch (e) { interp = null; }
+
+      return { payload: obj, cityComparison, interp };
+    }
+
+    async function callAIServerless(prompt, maxTokens, modelName = 'gpt-4o-mini') {
+      const url = '/api/openai';
+      
+      try {
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            maxTokens: maxTokens || AI_MAX_TOKENS,
+            model: modelName
+          })
+        });
+        
+        if (!resp.ok) {
+          const errorData = await resp.json();
+          throw new Error(errorData.error || errorData.details || `Server error: ${resp.status}`);
+        }
+        
+        const data = await resp.json();
+        
+        // Extract the response text from OpenAI format
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          return {
+            text: data.choices[0].message.content,
+            raw: data,
+            usedModel: modelName
+          };
+        } else {
+          throw new Error('Unexpected response format from server');
+        }
+      } catch (error) {
+        console.error('Serverless function call failed:', error);
+        throw error;
+      }
+    }
+
+    // Helper to append HTML content into the chat as an assistant/recommendation message
+    function addChatHtmlMessage(htmlContent, type = 'assistant') {
+      const messagesContainer = document.getElementById('aiChatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `ai-message ai-${type}-message`;
+      // Allow limited HTML produced by renderAIResponse
+      const inner = document.createElement('div');
+      inner.innerHTML = htmlContent;
+      messageDiv.appendChild(inner);
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      chatMessages.push({ content: htmlContent, type, timestamp: new Date(), html: true });
+    }
+
+    let recommendInFlight = false;
+    // helper to insert a replaceable assistant typing bubble and return the element
+    function insertTypingBubble() {
+      const messagesContainer = document.getElementById('aiChatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `ai-message ai-assistant-message`;
+      messageDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div><div style="text-align:center;color:#cfd8dc;margin-top:6px">Analyzing — please wait…</div>`;
+      // append and return for later replacement
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return messageDiv;
+    }
+
+    document.getElementById('aiRecommendBtn').addEventListener('click', async () => {
+      const statusEl = document.getElementById('aiStatus');
+      const recommendBtn = document.getElementById('aiRecommendBtn');
+      if (recommendInFlight) return; // already running
+      statusEl.textContent = '';
+      // collect all selected areas (support multi-area analysis)
+      const areaCbs = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]')).filter(cb => cb.checked);
+      const dataCb = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]')).find(cb => cb.checked);
+      if (!areaCbs.length || !dataCb) { statusEl.textContent = 'Select at least one area and a data type first.'; return; }
+      const dataType = dataCb.value;
+      statusEl.textContent = 'Preparing data...';
+  // disable recommend button to avoid spam
+  recommendInFlight = true;
+  recommendBtn.disabled = true;
+
+      // gather data for all selected areas in parallel
+      const areaKeys = areaCbs.map(cb => cb.value);
+  const gatherPromises = areaKeys.map(k => gatherCurrentDataFor(k, dataType).then(r => ({ area: k, payload: r.payload, cityComparison: r.cityComparison, interp: r.interp })).catch(e => ({ area: k, error: String(e) })));
+      const areasData = await Promise.all(gatherPromises);
+      // validate
+  const successful = areasData.filter(a => a.payload && !a.error);
+      if (!successful.length) { statusEl.textContent = 'Failed to gather data for selected areas.'; return; }
+
+      // Ensure each successful area has an interp (label/advice/percentile). If gather did not compute interp
+      // (because city-level meta wasn't available), try to compute it here using dataset city distribution
+      // so single-area prompts include the same qualitative label the UI shows.
+      try {
+        const dsAll = await loadDataset(dataType);
+        // Try to find city-level distribution from metadata first
+        const meta = DATASET_META[dataType] || null;
+        let cityDist = meta && meta.city_means && meta.city_means[activeYear] ? meta.city_means[activeYear] : null;
+        if (!cityDist && dsAll && dsAll[activeYear]) {
+          // Build a simple array of numeric representative values across all areas in dataset for the year
+          cityDist = [];
+          const yearBlock = dsAll[activeYear];
+          Object.keys(yearBlock).forEach(k => {
+            const s = yearBlock[k];
+            if (!s) return;
+            let v = null;
+            if (typeof s.mean === 'number' && Number.isFinite(s.mean)) v = s.mean;
+            else if (typeof s.median === 'number' && Number.isFinite(s.median)) v = s.median;
+            if (v !== null) cityDist.push(v);
+          });
+        }
+
+        for (const s of successful) {
+          if (s.interp) continue; // already computed
+          try {
+            const summary = s.payload && s.payload.summary ? s.payload.summary : {};
+            // Prefer median for 'light', otherwise mean then median
+            let rep = null;
+            if (dataType === 'light') {
+              if (summary.median !== undefined && summary.median !== null) rep = summary.median;
+              else if (summary.mean !== undefined && summary.mean !== null) rep = summary.mean;
+            } else {
+              if (summary.mean !== undefined && summary.mean !== null) rep = summary.mean;
+              else if (summary.median !== undefined && summary.median !== null) rep = summary.median;
+            }
+            if (rep !== null) {
+              const interp = interpretDataset(dataType, rep, cityDist);
+              if (interp) s.interp = interp;
+            }
+          } catch (e) { /* ignore per-area failures */ }
+        }
+      } catch (e) {
+        // If dataset load fails, ignore and proceed; existing interp (if any) will be used
+        console.warn('Failed to compute fallback interp for AI prompt', e);
+      }
+
+
+      // Decide prompt: multi-area if more than one area selected, otherwise single-area flow
+      let prompt = '';
+      // compute cross-metrics summary text (if available) and include in prompt
+      const crossMetricsText = await getCrossMetricsSummary(dataType, activeYear, areaKeys).catch(e => { console.warn('Cross-metrics summary error', e); return null; });
+      if (areasData.length > 1) {
+        prompt = await buildMultiAIPrompt(successful, dataType, crossMetricsText);
+      } else {
+        const single = successful[0];
+        // pass interp through so the single-area prompt can include the UI interpretation
+        const payloadWithInterp = Object.assign({}, single.payload, { interp: single.interp });
+        prompt = buildAIPrompt(humanizeArea(single.area), dataType, payloadWithInterp, single.cityComparison, crossMetricsText);
+      }
+
+  statusEl.textContent = 'Querying AI...';
+  // show replaceable typing bubble (centered) and hold a reference to replace when response arrives
+  const typingEl = insertTypingBubble();
+
+      try { console.log('AI prompt (multi/single):', prompt); } catch (e) {}
+
+      try {
+        const resp = await callAIServerless(prompt, AI_MAX_TOKENS, 'gpt-4o-mini');
+        try { console.log('AI call response (raw):', resp && resp.raw ? resp.raw : resp); } catch (e) {}
+        const aiText = resp && resp.text ? resp.text : null;
+
+        // If the model returned empty content, show the raw response for debugging
+        if (!aiText || aiText.trim() === '') {
+          console.warn('Model returned empty.');
+          statusEl.textContent = 'AI returned no text — showing raw response.';
+          addChatHtmlMessage(`<pre style="color:#f5f5f5;font-size:12px;white-space:pre-wrap;">${escapeHtml(JSON.stringify(resp && resp.raw ? resp.raw : resp, null, 2))}</pre>`, 'assistant');
+          return;
+        }
+
+        // Successful primary response -> render into chat as HTML (replace typing bubble)
+        let renderedText = aiText || '';
+        const html = renderAIResponse(renderedText);
+        try {
+          const replacement = document.createElement('div');
+          replacement.className = 'ai-message ai-assistant-message';
+          replacement.innerHTML = html;
+          if (typingEl && typingEl.parentNode) typingEl.parentNode.replaceChild(replacement, typingEl);
+          else addChatHtmlMessage(html, 'assistant');
+        } catch (e) {
+          addChatHtmlMessage(html, 'assistant');
+        }
+        statusEl.textContent = 'Done';
+        // update panel sizing after content changes
+        setTimeout(() => { updateAIPanelSize(); resizeCesiumContainer(); }, 80);
+      } catch (e) {
+        console.error('AI call failed', e);
+        statusEl.textContent = 'AI request failed: ' + (e.message || e.toString());
+        // replace typing bubble with an error message
+        try {
+          const errDiv = document.createElement('div');
+          errDiv.className = 'ai-message ai-assistant-message';
+          errDiv.textContent = 'AI request failed: ' + (e.message || String(e));
+          if (typingEl && typingEl.parentNode) typingEl.parentNode.replaceChild(errDiv, typingEl);
+          else addChatMessage('AI request failed: '+(e.message||String(e)), 'assistant');
+        } catch (ee) { addChatMessage('AI request failed: '+(e.message||String(e)), 'assistant'); }
+      }
+      // re-enable recommend button
+      recommendInFlight = false;
+      recommendBtn.disabled = false;
+    });
+
+    // small helper to safely escape HTML when showing raw JSON
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+// ---------- AI Chat Feature ----------
+let chatMessages = [];
+
+// Enhanced chat message function
+function addChatMessage(content, type = 'system') {
+  const messagesContainer = document.getElementById('aiChatMessages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `ai-message ai-${type}-message`;
+  
+  // Add typing indicator for assistant messages
+  if (type === 'assistant') {
+    messageDiv.innerHTML = `<div class="typing-indicator" style="display:none">
+      <span></span><span></span><span></span>
+    </div>`;
+    const textDiv = document.createElement('div');
+    textDiv.textContent = content;
+    messageDiv.appendChild(textDiv);
+  } else {
+    messageDiv.textContent = content;
+  }
+  
+  messagesContainer.appendChild(messageDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  // Store message
+  chatMessages.push({ content, type, timestamp: new Date() });
+}
+
+// Add typing indicator CSS
+const style = document.createElement('style');
+style.textContent = `
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background: #00bfa6;
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+`;
+document.head.appendChild(style);
+
+function clearChat() {
+  const messagesContainer = document.getElementById('aiChatMessages');
+  const header = document.getElementById('aiSystemPrompt');
+  const recommendWrap = document.getElementById('aiRecommendWrap');
+  // Remove all children except the header and recommend controls so the button stays visible
+  Array.from(messagesContainer.children).forEach(child => {
+    if (child !== header && child !== recommendWrap) messagesContainer.removeChild(child);
+  });
+  // Reset chat messages store but keep system prompt message in DOM
+  chatMessages = [];
+  // Ensure the system prompt text exists (header already present)
+  if (header) header.textContent = 'Ask questions about the selected data or get automated recommendations.';
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('aiChatInput');
+  const sendBtn = document.getElementById('aiSendBtn');
+  
+  const message = input.value.trim();
+  if (!message) return;
+  
+  // Check if we have data selected
+  const areaCbs = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]')).filter(cb => cb.checked);
+  const dataCb = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]')).find(cb => cb.checked);
+  
+  if (!areaCbs.length || !dataCb) {
+    addChatMessage('Please select at least one area and a data type first.', 'system');
+    return;
+  }
+  
+  // Add user message to chat
+  addChatMessage(message, 'user');
+  input.value = '';
+  sendBtn.disabled = true;
+  
+  try {
+    const dataType = dataCb.value;
+    const areaKeys = areaCbs.map(cb => cb.value);
+    
+    // Gather current data context
+    const gatherPromises = areaKeys.map(k => 
+      gatherCurrentDataFor(k, dataType)
+        .then(r => ({ area: k, payload: r.payload, cityComparison: r.cityComparison, interp: r.interp }))
+        .catch(e => ({ area: k, error: String(e) }))
+    );
+    
+    const areasData = await Promise.all(gatherPromises);
+    const successful = areasData.filter(a => a.payload && !a.error);
+    
+    if (!successful.length) {
+      addChatMessage('Unable to gather data for analysis. Please try different selections.', 'assistant');
+      return;
+    }
+    
+    // Get cross-metrics context
+    const crossMetricsText = await getCrossMetricsSummary(dataType, activeYear, areaKeys).catch(() => null);
+    
+    // Build chat-specific prompt
+    const chatPrompt = buildChatPrompt(message, successful, dataType, crossMetricsText);
+    
+    // Call AI
+    const response = await callAIServerless(chatPrompt, 400, 'gpt-4o-mini');
+    
+    if (response && response.text) {
+      addChatMessage(response.text, 'assistant');
+    } else {
+      addChatMessage('I apologize, but I encountered an issue generating a response. Please try again.', 'assistant');
+    }
+    
+  } catch (error) {
+    console.error('Chat error:', error);
+    addChatMessage('Sorry, I encountered an error. Please try again later.', 'assistant');
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+function buildChatPrompt(userMessage, areasData, dataType, crossMetricsText) {
+  const selectedAreas = areasData.map(a => humanizeArea(a.area)).join(', ');
+  const dataDisplayName = datasetDisplayName(dataType, areasData[0]?.payload?.summary?.units || '');
+  
+  return `As an urban planning expert, provide a concise, data-backed response to the user's question.
+
+CONTEXT:
+- Data Type: ${dataDisplayName}
+- Year: ${activeYear}
+- Selected Areas: ${selectedAreas}
+- Current Values: ${areasData.map(a => {
+    const summary = a.payload?.summary || {};
+    const value = dataType === 'light' ? (summary.median || summary.mean) : (summary.mean || summary.median);
+    return `${humanizeArea(a.area)}: ${formatNumber(value, dataType)} ${summary.units || ''}`;
+  }).join('; ')}
+
+USER QUESTION: ${userMessage}
+
+INSTRUCTIONS:
+- Answer specifically about the selected data and areas
+- Reference actual metrics and values when available
+- Keep response under 100 words - be concise
+- Be practical and actionable
+- Focus on urban planning insights
+- If question cannot be answered with available data, suggest what data would be needed
+
+RESPONSE:`;
+}
+
+// Event Listeners for Chat
+document.getElementById('aiSendBtn').addEventListener('click', sendChatMessage);
+
+document.getElementById('aiChatInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendChatMessage();
+  }
+});
+
+// Clear chat when selections change and panel becomes visible
+const originalUpdateAIAdvisorVisibility = updateAIAdvisorVisibility;
+updateAIAdvisorVisibility = function() {
+  originalUpdateAIAdvisorVisibility();
+  
+  // Clear chat when selections change and panel is visible
+  const dataChecked = Array.from(document.querySelectorAll('#dataList input[type="checkbox"]')).some(cb => cb.checked);
+  const areaChecked = Array.from(document.querySelectorAll('#areasList input[type="checkbox"]')).some(cb => cb.checked);
+  const panelVisible = document.getElementById('aiAdvisor').style.display === 'block';
+  
+  if (panelVisible && dataChecked && areaChecked) {
+    clearChat();
+  }
+};      
+
+// Add this function to handle AI panel resizing
+function updateAIPanelSize() {
+  const aiPanel = document.getElementById('aiAdvisor');
+  const topNav = document.getElementById('topNav');
+  const analytics = document.getElementById('analyticsWrapper');
+  
+  if (!aiPanel || aiPanel.style.display !== 'block') return;
+
+  const topNavHeight = topNav ? topNav.offsetHeight : 48;
+  
+  if (analyticsVisible && analytics) {
+    // Get the exact position of analytics panel
+    const analyticsRect = analytics.getBoundingClientRect();
+
+    // Compute bottom offset in pixels so the AI panel's bottom aligns exactly with analytics top
+    const bottomPx = Math.max(0, Math.floor(window.innerHeight - analyticsRect.top));
+
+    aiPanel.style.top = topNavHeight + 'px';
+    aiPanel.style.bottom = bottomPx + 'px';
+    // clear explicit height so top/bottom determine size
+    aiPanel.style.height = 'auto';
+    // Ensure AI panel sits above analytics visually
+    try { aiPanel.style.zIndex = '1995'; } catch (e) {}
+  } else {
+    // No analytics visible - AI panel can take full height
+    aiPanel.style.top = topNavHeight + 'px';
+    aiPanel.style.bottom = '0';
+    aiPanel.style.height = `calc(100% - ${topNavHeight}px)`;
+    try { aiPanel.style.zIndex = '1995'; } catch (e) {}
+  }
+  
+  // Make sure the inner content has proper background
+  const aiAdvisorInner = document.getElementById('aiAdvisorInner');
+  if (aiAdvisorInner) {
+    aiAdvisorInner.style.background = 'linear-gradient(180deg, #0b0f13 0%, #0d1115 100%)';
+    aiAdvisorInner.style.height = '95%';
+  }
+}
+
+// Update the resize handler
+window.addEventListener('resize', () => {
+  updateAIPanelSize();
+  resizeCesiumContainer();
+});
+  </script>
+</body>
+</html>

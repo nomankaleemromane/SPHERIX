@@ -1,0 +1,355 @@
+{
+  "housing": {
+    "abushagarah": {
+      "history": {
+        "2018": 0.0435225150081787,
+        "2022": 0.0281556843463343,
+        "2024": 0.0372147966996933
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.05743559417351207,
+          "2028": 0.0888180767697122,
+          "2030": 0.13136224448589928
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.001395210640197906,
+          -5.640492694064191,
+          5700.808004003244
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0372147966996933,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "ghuwair": {
+      "history": {
+        "2018": 0.0253770590596689,
+        "2022": 0.0126834127165858,
+        "2024": 0.0226761922278887
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.043562040189499385,
+          "2028": 0.07534095660867024,
+          "2030": 0.11801294148244779
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0013616335567486924,
+          -5.504172980849699,
+          5562.433440060684
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0226761922278887,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "halwan": {
+      "history": {
+        "2018": 0.0113394203277354,
+        "2022": 0.0111066468398346,
+        "2024": 0.017457834827058
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.028120739300902642,
+          "2028": 0.043095360262213944,
+          "2030": 0.062381697710407025
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0005389645608698458,
+          -2.1774750192858394,
+          2199.317611959417
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.017457834827058,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "industrial": {
+      "history": {
+        "2018": 0.0553861553155306,
+        "2022": 0.0354834457378313,
+        "2024": 0.0388983132013275
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.05122399550054979,
+          "2028": 0.07246049263085297,
+          "2030": 0.10260780459702801
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0011138518542352458,
+          -4.50493716850417,
+          4555.052953750036
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0388983132013275,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "jubail": {
+      "history": {
+        "2018": 0.0459331189459794,
+        "2022": 0.0344140101730215,
+        "2024": 0.0281792926389252
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.021627799673126447,
+          "2028": 0.014759531275586824,
+          "2030": 0.007574487446362355
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          -3.959692896373597e-05,
+          0.1570918158202314,
+          -155.7138270609638
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0281792926389252,
+        "trend": "decreasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "majaz": {
+      "history": {
+        "2018": -0.0343687910438721,
+        "2022": 0.0182143776286969,
+        "2024": 0.0152598449115432
+      },
+      "prediction": {
+        "predictions": {
+          "2026": -0.007192099170424626,
+          "2028": -0.0491414546231681,
+          "2030": -0.11058822143786529
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          -0.0024371764208420666,
+          9.859338532368676,
+          -9971.207496281779
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0152598449115432,
+        "trend": "decreasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "mughaider_suburb": {
+      "history": {
+        "2018": -0.0069028501903531,
+        "2022": -0.0026651536940341,
+        "2024": 0.0041259409452161
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.014031866510777036,
+          "2028": 0.02705262300423783,
+          "2030": 0.043188210424204954
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.00038935386587998674,
+          -1.5719301940308412,
+          1586.5731361881947
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0041259409452161,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "mussalla": {
+      "history": {
+        "2018": 0.0268326236459985,
+        "2022": 0.0144168646315417,
+        "2024": 0.02347903876524
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.04272124865747173,
+          "2028": 0.07214349430978473,
+          "2030": 0.11174577572182898
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0012725044699323535,
+          -5.144021998279584,
+          5198.612732139042
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.02347903876524,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "muwaileh_suburb": {
+      "history": {
+        "2018": 0.0333075019299505,
+        "2022": 0.0296380893241349,
+        "2024": 0.0280372499738862
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.02659232192536365,
+          "2028": 0.02530330517862467,
+          "2030": 0.024170199733632103
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          1.9488912719334716e-05,
+          -0.07965256053755469,
+          81.40700766586322
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0280372499738862,
+        "trend": "decreasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "noaf": {
+      "history": {
+        "2018": 0.0494243158954776,
+        "2022": 0.0294016142715884,
+        "2024": 0.0202773532270611
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.011744485360679846,
+          "2028": 0.003803010672640994,
+          "2030": -0.0035470708373850357
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          7.392414727614566e-05,
+          -0.30365923040155696,
+          311.79067213405466
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0202773532270611,
+        "trend": "decreasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "qasmiyah": {
+      "history": {
+        "2018": 0.0124254077269634,
+        "2022": 0.0128256356708417,
+        "2024": 0.0203528393892534
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.032764769603545574,
+          "2028": 0.05006142631691546,
+          "2030": 0.07224280952641493
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0006105908121366018,
+          -2.4666868240455475,
+          2491.262817888265
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0203528393892534,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "yarmouk": {
+      "history": {
+        "2018": 0.0291815719550755,
+        "2022": 0.0187981288394197,
+        "2024": 0.0222172509114826
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.0313769354024771,
+          "2028": 0.04627718231267863,
+          "2030": 0.06691799164218537
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0007175703024091693,
+          -2.901579882511541,
+          2933.2386202921252
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0222172509114826,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    },
+    "zahia": {
+      "history": {
+        "2018": 0.0375849487493139,
+        "2022": 0.0226960422495279,
+        "2024": 0.0261193469477645
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 0.036787823609301995,
+          "2028": 0.054701472236047266,
+          "2030": 0.0798602928280161
+        },
+        "model_type": "quadratic",
+        "coefficients": [
+          0.0009056464955742946,
+          -3.6625340687445713,
+          3702.9453762321973
+        ],
+        "r2": 1.0,
+        "num_points": 3,
+        "last_year": 2024,
+        "last_value": 0.0261193469477645,
+        "trend": "increasing",
+        "warning": null
+      },
+      "units": "NDBI index (unitless; typical range -1..1)"
+    }
+  }
+}

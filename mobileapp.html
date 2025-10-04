@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SPHERIX Mobile App</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #e6f0ea;
+    }
+
+        /* Top navigation - matches dashboard */
+    #topNav {
+    position: fixed;
+    left: 320px; /* Start after the side panel */
+    right: 0;
+    top: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px;
+    z-index: 1500;
+    background: #0b0f13;
+    border-radius: 0;
+    box-shadow: 0 8px 24px rgba(2,8,20,0.45);
+    border: 0;
+    gap: 12px;
+    overflow: visible;
+    pointer-events: auto;
+    }
+    
+    #topNav .nav-left { display:flex;gap:12px;align-items:center }
+    #topNav a { 
+      color: #d5f6ee; 
+      text-decoration: none; 
+      font-weight:600; 
+      font-size:14px; 
+      padding:8px 12px; 
+      border-radius:8px;
+      transition: all 0.2s ease;
+    }
+    #topNav a:hover { 
+      background: rgba(0,191,166,0.06); 
+      color:#00bfa6;
+    }
+    #topNav .nav-right { display:flex;gap:12px;align-items:center }
+    
+    /* Left panel for navigation */
+    #sidePanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px; /* Dashboard uses 320px */
+    height: 100vh;
+    z-index: 1000;
+    box-sizing: border-box;
+    padding: 22px;
+    color: #e6f0ea;
+    background: linear-gradient(180deg, rgba(8,12,16,0.96) 0%, rgba(12,16,20,0.92) 100%);
+    backdrop-filter: blur(6px) saturate(1.08);
+    box-shadow: 6px 0 30px rgba(2,8,20,0.65);
+    border-right: 1px solid rgba(255,255,255,0.03);
+    overflow-y: auto;
+    }
+
+    /* Use dashboard's exact h1 styling */
+    #sidePanel h1 {
+    font-family: 'Passion One', cursive;
+    font-size: 22px;
+    margin: 0 0 18px 0;
+    color: #7ef3dd;
+    text-align: center;
+    border-bottom: 1px dashed rgba(126,243,221,0.08);
+    padding-bottom: 10px;
+    }
+
+    /* Use dashboard's panel-section styling */
+    .nav-section {
+    margin-bottom: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.012);
+    }
+
+    .nav-section h2 {
+    font-family: 'Passion One', cursive;
+    font-size: 15px;
+    margin: 0 0 12px 0;
+    color: #9ff0e2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    }
+    
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .nav-link {
+      color: #d7f2ee;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-link:hover {
+      background: rgba(0,191,166,0.1);
+      color: #00bfa6;
+    }
+    
+    .nav-link.active {
+      background: rgba(0,191,166,0.15);
+      color: #00bfa6;
+      border-left: 3px solid #00bfa6;
+    }
+    
+    /* Main content area */
+    #mainContent {
+    margin-left: 320px; /* Match the side panel width */
+    margin-top: 50px; /* No top margin needed */
+    padding: 30px;
+    box-sizing: border-box;
+    max-width: 1200px;
+    background: #0b0f13;
+    
+    }
+    
+    .content-section {
+      margin-bottom: 60px;
+    }
+    
+    .section-title {
+      font-family: 'Passion One', cursive;
+      font-size: 28px;
+      color: #7ef3dd;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(126,243,221,0.2);
+      padding-bottom: 10px;
+    }
+    
+    .section-subtitle {
+      font-size: 18px;
+      color: #9ff0e2;
+      margin-bottom: 15px;
+    }
+    
+    /* Figma prototype container */
+    .prototype-container {
+      width: 100%;
+      height: 700px;
+      background: #0f0f1a;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .prototype-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    /* Feature cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .feature-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,191,166,0.1);
+      border-color: rgba(0,191,166,0.2);
+    }
+    
+    .feature-card h3 {
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      color: #7ef3dd;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .feature-card p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #cfd8dc;
+      margin: 0;
+    }
+    
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      background: rgba(0,191,166,0.2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00bfa6;
+      font-size: 14px;
+    }
+    
+    /* Scrollbar styling */
+    #sidePanel::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #sidePanel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    #sidePanel::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #00bfa6, #007a66);
+      border-radius: 8px;
+    }
+    
+    #sidePanel::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #00a08f, #00624f);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      #sidePanel {
+        width: 240px;
+      }
+      
+      #mainContent {
+        margin-left: 240px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      #sidePanel {
+        display: none;
+      }
+      
+      #mainContent {
+        margin-left: 0;
+        padding: 20px;
+      }
+    }
+#sidePanel::-webkit-scrollbar {
+  width: 10px;
+}
+
+#sidePanel::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+#sidePanel::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00bfa6, #007a66);
+  border-radius: 8px;
+  border: 2px solid rgba(8,12,16,0.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+#sidePanel::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00a08f, #00624f);
+}
+
+/* Firefox scrollbar support */
+#sidePanel {
+  scrollbar-width: thin;
+  scrollbar-color: #00bfa6 transparent;
+}
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <div id="topNav">
+    <div class="nav-left">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="project_plan.html">Project Plan</a>
+      <a href="#" class="active">Mobile App</a>
+    </div>
+    <div class="nav-right">
+      <!-- Could add additional navigation items here if needed -->
+    </div>
+  </div>
+
+  <!-- Side Panel -->
+  <div id="sidePanel">
+    <div class="logo-container" style="text-align:center;margin-bottom:20px;">
+      <img src="images/logo2.svg" alt="SPHERIX Logo" style="max-width:140px;height:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45));">
+    </div>
+    
+    
+    <div class="nav-section">
+      <h2>Prototype Navigation</h2>
+      <div class="nav-links">
+        <a href="#prototype" class="nav-link active">
+          <div class="feature-icon">1</div>
+          Interactive Prototype
+        </a>
+        <a href="#purpose" class="nav-link">
+          <div class="feature-icon">2</div>
+          App Purpose
+        </a>
+        <a href="#features" class="nav-link">
+          <div class="feature-icon">3</div>
+          Core Features
+        </a>
+        <a href="#impact" class="nav-link">
+          <div class="feature-icon">4</div>
+          Urban Planning Impact
+        </a>
+      </div>
+    </div>
+    
+    <div class="nav-section">
+      <h2>Key Screens</h2>
+      <div class="nav-links">
+        <a href="#onboarding" class="nav-link">Onboarding & Privacy</a>
+        <a href="#home" class="nav-link">Home / Local Overview</a>
+        <a href="#recommendations" class="nav-link">Action Recommendations</a>
+        <a href="#alerts" class="nav-link">Alerts & Notifications</a>
+        <a href="#reporting" class="nav-link">Issue Reporting</a>
+        <a href="#community" class="nav-link">Volunteer & Community</a>
+        <a href="#impact" class="nav-link">My Impact Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent">
+    <!-- Prototype Section -->
+    <section id="prototype" class="content-section">
+      <h2 class="section-title">SPHERIX Mobile App Prototype</h2>
+      <p style="font-size:16px;color:#cfd8dc;margin-bottom:20px;line-height:1.6;">
+        Explore the interactive prototype of the SPHERIX mobile application designed to engage residents in local interventions, 
+        report issues, and follow personalized recommendations to improve city health and resilience.
+      </p>
+      
+      <div class="prototype-container">
+        <iframe class="prototype-iframe" 
+                src="https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/proto/q4yg0QvFJI2t3zg3nT6Ozk/Spherix?node-id=0-1&t=2sZJOCdFEp37ykb7-1" 
+                allowfullscreen></iframe>
+      </div>
+      
+      <div style="display:flex;justify-content:center;margin-top:15px;">
+        <a href="https://www.figma.com/proto/q4yg0QvFJI2t3zg3nT6Ozk/Spherix?node-id=0-1&t=2sZJOCdFEp37ykb7-1" 
+           target="_blank" 
+           style="background:linear-gradient(180deg,#00c9a9,#00a88b);border:none;padding:10px 20px;color:#052018;font-weight:600;cursor:pointer;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+          Open in New Tab
+        </a>
+      </div>
+    </section>
+    
+    <!-- Purpose Section -->
+    <section id="purpose" class="content-section">
+      <h2 class="section-title">App Purpose & Vision</h2>
+      <p style="font-size:16px;color:#cfd8dc;line-height:1.7;margin-bottom:20px;">
+        SPHERIX bridges the gap between citizens and urban planning by leveraging NASA Earth observation data, 
+        municipal information, and community input to create a responsive, data-driven platform for urban resilience.
+      </p>
+      
+      <div style="background:rgba(0,191,166,0.05);border-left:4px solid #00bfa6;padding:15px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
+        <h3 style="font-family:'Passion One',cursive;color:#7ef3dd;margin-top:0;">Mission Statement</h3>
+        <p style="margin:0;color:#cfd8dc;">
+          To empower residents as active participants in urban sustainability through personalized insights, 
+          actionable recommendations, and streamlined civic engagement tools.
+        </p>
+      </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="content-section">
+      <h2 class="section-title">Core Features</h2>
+      <p class="section-subtitle">Comprehensive functionality for citizen engagement and urban resilience</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3><div class="feature-icon">1</div>Onboarding & Privacy Consent</h3>
+          <p>Simple welcome flow introducing the app purpose with clear privacy controls and data usage transparency.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">2</div>Data Policy Transparency</h3>
+          <p>Clear explanation of data sources (NASA, municipal, citizen) and purpose-based usage breakdown.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">3</div>Home / Local Overview</h3>
+          <p>Interactive city map with environmental risk badges (Heat, Air, Population, Green Spaces) and layered data visualization.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">4</div>Action Recommendations</h3>
+          <p>Personalized daily/weekly tasks with source labels, confidence scores, and completion tracking.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">5</div>Alerts & Push Notifications</h3>
+          <p>Real-time emergency advisories (heat warnings, air quality drops) with safety tips and authority contacts.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">6</div>Issue Reporting</h3>
+          <p>One-tap submission for urban problems with photo upload, auto-location, and municipal routing.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">7</div>Volunteer & Community</h3>
+          <p>Event listings for sustainability drives with participation tracking and social features.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3><div class="feature-icon">8</div>My Impact Dashboard</h3>
+          <p>Personal progress tracking with gamified badges, contribution metrics, and community leaderboards.</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Impact Section -->
+    <section id="impact" class="content-section">
+      <h2 class="section-title">Urban Planning Impact</h2>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;">
+        <div>
+          <h3 style="font-family:'Passion One',cursive;color:#7ef3dd;margin-bottom:15px;">For Citizens</h3>
+          <ul style="color:#cfd8dc;line-height:1.7;padding-left:20px;">
+            <li>Personalized environmental insights and health recommendations</li>
+            <li>Streamlined civic engagement and issue reporting</li>
+            <li>Community connection through shared sustainability goals</li>
+            <li>Transparent understanding of urban data and its applications</li>
+            <li>Empowerment through measurable impact tracking</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 style="font-family:'Passion One',cursive;color:#7ef3dd;margin-bottom:15px;">For Urban Planners</h3>
+          <ul style="color:#cfd8dc;line-height:1.7;padding-left:20px;">
+            <li>Real-time ground truth data from citizen reports</li>
+            <li>Enhanced understanding of local environmental concerns</li>
+            <li>Data-driven prioritization of urban interventions</li>
+            <li>Increased community buy-in for sustainability initiatives</li>
+            <li>Comprehensive monitoring of urban health indicators</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="background:rgba(126,243,221,0.08);border:1px solid rgba(126,243,221,0.15);border-radius:10px;padding:20px;margin-top:30px;">
+        <h3 style="font-family:'Passion One',cursive;color:#7ef3dd;margin-top:0;">Integrated Data Ecosystem</h3>
+        <p style="color:#cfd8dc;line-height:1.7;margin-bottom:15px;">
+          SPHERIX creates a feedback loop where NASA satellite data informs citizen recommendations, 
+          while citizen reports ground-truth and enhance the satellite observations, creating a continuously 
+          improving understanding of urban environments.
+        </p>
+        <div style="display:flex;justify-content:center;margin-top:15px;">
+          <div style="display:flex;align-items:center;gap:10px;color:#9ff0e2;font-size:14px;">
+            <span>NASA Data</span> 
+            <span style="color:#00bfa6">→</span> 
+            <span>Citizen Insights</span> 
+            <span style="color:#00bfa6">→</span> 
+            <span>Urban Planning</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // Update active link on scroll
+    window.addEventListener('scroll', function() {
+      const sections = document.querySelectorAll('.content-section');
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      let currentSection = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (window.scrollY >= sectionTop) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').substring(1) === currentSection) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

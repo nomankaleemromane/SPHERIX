@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SPHERIX - Project Plan</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Cesium 1.120 -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+  <!-- Prism.js for code highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Top Navigation - identical to dashboard */
+    #topNav {
+      position: fixed;
+      left: 320px;
+      right: 0;
+      top: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px;
+      z-index: 1500;
+      background: #0b0f13;
+      border-radius: 0;
+      box-shadow: 0 8px 24px rgba(2,8,20,0.45);
+      border: 0;
+      gap: 12px;
+      overflow: visible;
+      pointer-events: auto;
+    }
+
+    #topNav .nav-left { display:flex;gap:12px;align-items:center }
+    #topNav a { color: #d5f6ee; text-decoration: none; font-weight:600; font-size:14px; padding:8px 12px; border-radius:8px }
+    #topNav a:hover { background: rgba(0,191,166,0.06); color:#00bfa6 }
+    #topNav .nav-right { display:flex;gap:12px;align-items:center }
+
+    /* Left Dashboard Panel - identical styling */
+    #dashboardPanel{
+      position:fixed;
+      top:0;
+      left:0;
+      width:320px;
+      height:100vh;
+      z-index:1000;
+      box-sizing:border-box;
+      padding:22px;
+      color:#e6f0ea;
+      background: linear-gradient(180deg, rgba(8,12,16,0.96) 0%, rgba(12,16,20,0.92) 100%);
+      backdrop-filter: blur(6px) saturate(1.08);
+      box-shadow: 6px 0 30px rgba(2,8,20,0.65);
+      border-right: 1px solid rgba(255,255,255,0.03);
+      overflow-y:auto;
+    }
+
+    #dashboardPanel h1{
+      font-family:'Passion One',cursive;
+      font-size:22px;
+      margin:0 0 18px 0;
+      color:#7ef3dd;
+      text-align:center;
+      border-bottom: 1px dashed rgba(126,243,221,0.08);
+      padding-bottom:10px;
+    }
+
+    .panel-section{
+      margin-bottom:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      padding:12px;
+      border-radius:10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.012);
+    }
+
+    .panel-section h2{
+      font-family:'Passion One',cursive;
+      font-size:15px;
+      margin:0 0 12px 0;
+      color:#9ff0e2;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .logo-container{text-align:center;margin-bottom:14px;padding-bottom:8px}
+    .logo-img{max-width:140px;height:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45));}
+
+    /* Navigation Menu */
+    .nav-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-menu li {
+      margin-bottom: 8px;
+    }
+
+    .nav-menu a {
+      display: block;
+      color: #d7f2ee;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-menu a:hover {
+      background: rgba(0,191,166,0.1);
+      color: #00bfa6;
+      border-left-color: #00bfa6;
+    }
+
+    .nav-menu a.active {
+      background: rgba(0,191,166,0.15);
+      color: #00bfa6;
+      border-left-color: #00bfa6;
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    #mainContent {
+      margin-left: 320px;
+      margin-top: 48px;
+      padding: 0;
+      background: #0b0f13;
+      min-height: calc(100vh - 48px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, rgba(0,191,166,0.1) 0%, rgba(8,12,16,0.9) 100%);
+      padding: 60px 40px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .hero-title {
+      font-family: 'Passion One', cursive;
+      font-size: 48px;
+      color: #7ef3dd;
+      margin: 0 0 16px 0;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      color: #cfd8dc;
+      margin: 0 0 32px 0;
+      font-weight: 300;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      min-width: 140px;
+    }
+
+    .stat-number {
+      font-family: 'Passion One', cursive;
+      font-size: 32px;
+      color: #00bfa6;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #a0a0b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Content Sections */
+    .content-section {
+      padding: 60px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .section-title {
+      font-family: 'Passion One', cursive;
+      font-size: 32px;
+      color: #7ef3dd;
+      margin: 0 0 24px 0;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      color: #cfd8dc;
+      margin: 0 0 40px 0;
+      text-align: center;
+      font-weight: 300;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+
+    .arch-component {
+      background: rgba(0,191,166,0.1);
+      border: 2px solid #00bfa6;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 180px;
+      flex: 1;
+      position: relative;
+    }
+
+    .arch-component::after {
+      content: '→';
+      position: absolute;
+      right: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #00bfa6;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .arch-component:last-child::after {
+      display: none;
+    }
+
+    .arch-title {
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      color: #00bfa6;
+      margin: 0 0 8px 0;
+    }
+
+    .arch-description {
+      font-size: 14px;
+      color: #cfd8dc;
+    }
+
+    /* Challenge Solutions */
+    .solutions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin: 40px 0;
+    }
+
+    .solution-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .solution-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,191,166,0.15);
+      border-color: #00bfa6;
+    }
+
+    .solution-title {
+      font-family: 'Passion One', cursive;
+      font-size: 20px;
+      color: #7ef3dd;
+      margin: 0 0 12px 0;
+    }
+
+    .solution-description {
+      font-size: 14px;
+      color: #cfd8dc;
+      line-height: 1.6;
+    }
+
+    /* Stakeholder Grid */
+    .stakeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 40px 0;
+    }
+
+    .stakeholder-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stakeholder-card:hover {
+      background: rgba(0,191,166,0.1);
+      border-color: #00bfa6;
+    }
+
+    .stakeholder-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .stakeholder-title {
+      font-family: 'Passion One', cursive;
+      font-size: 16px;
+      color: #00bfa6;
+      margin: 0 0 8px 0;
+    }
+
+    .stakeholder-role {
+      font-size: 13px;
+      color: #a0a0b0;
+    }
+
+    /* Timeline */
+    .timeline-container {
+      position: relative;
+      margin: 40px 0;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #00bfa6;
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      margin: 40px 0;
+      position: relative;
+    }
+
+    .timeline-item:nth-child(odd) {
+      flex-direction: row-reverse;
+    }
+
+    .timeline-content {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px;
+      width: 45%;
+      position: relative;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      background: #00bfa6;
+      border-radius: 50%;
+      border: 4px solid #0b0f13;
+      z-index: 2;
+    }
+
+    .timeline-date {
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      color: #00bfa6;
+      margin: 0 0 8px 0;
+    }
+
+    .timeline-title {
+      font-size: 16px;
+      color: #7ef3dd;
+      margin: 0 0 8px 0;
+    }
+
+    .timeline-description {
+      font-size: 14px;
+      color: #cfd8dc;
+      line-height: 1.5;
+    }
+
+    .status-current {
+      background: rgba(0,191,166,0.2);
+      border-color: #00bfa6;
+    }
+
+    .status-completed {
+      background: rgba(76,175,80,0.2);
+      border-color: #4caf50;
+    }
+
+    /* Code Snippets */
+    .code-section {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .code-header {
+      background: #2d2d2d;
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-title {
+      color: #00bfa6;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .code-content {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-content pre {
+      margin: 0;
+      font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* 13 Areas Grid */
+    .areas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 40px 0;
+    }
+
+    .area-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .area-card:hover {
+      background: rgba(0,191,166,0.1);
+      border-color: #00bfa6;
+      transform: translateY(-2px);
+    }
+
+    .area-name {
+      font-family: 'Passion One', cursive;
+      font-size: 16px;
+      color: #00bfa6;
+      margin: 0 0 8px 0;
+    }
+
+    .area-type {
+      font-size: 12px;
+      color: #a0a0b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Impact Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin: 40px 0;
+    }
+
+    .metric-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,191,166,0.15);
+    }
+
+    .metric-percentage {
+      font-family: 'Passion One', cursive;
+      font-size: 36px;
+      color: #00bfa6;
+      margin: 0 0 8px 0;
+    }
+
+    .metric-label {
+      font-size: 14px;
+      color: #cfd8dc;
+      margin: 0 0 8px 0;
+    }
+
+    .metric-description {
+      font-size: 12px;
+      color: #a0a0b0;
+    }
+
+    /* Scrollbar styling */
+    #dashboardPanel::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    #dashboardPanel::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 8px 0;
+    }
+
+    #dashboardPanel::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #00bfa6, #007a66);
+      border-radius: 8px;
+      border: 2px solid rgba(8,12,16,0.45);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    #dashboardPanel::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #00a08f, #00624f);
+    }
+
+    #dashboardPanel {
+      scrollbar-width: thin;
+      scrollbar-color: #00bfa6 transparent;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      #dashboardPanel {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      #mainContent {
+        margin-left: 0;
+      }
+
+      #topNav {
+        left: 0;
+      }
+
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .hero-stats {
+        gap: 20px;
+      }
+
+      .architecture-diagram {
+        flex-direction: column;
+      }
+
+      .arch-component::after {
+        content: '↓';
+        right: 50%;
+        top: auto;
+        bottom: -15px;
+        transform: translateX(50%);
+      }
+
+      .timeline-line {
+        left: 30px;
+      }
+
+      .timeline-item {
+        flex-direction: row !important;
+        padding-left: 60px;
+      }
+
+      .timeline-content {
+        width: 100%;
+      }
+
+      .timeline-dot {
+        left: 30px;
+      }
+    }
+
+    /* Animation classes */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Pipeline Diagram Styles */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 40px 0;
+      padding: 30px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    
+    .pipeline-stage {
+      flex: 1;
+      text-align: center;
+      padding: 20px;
+      background: rgba(0,191,166,0.1);
+      border-radius: 12px;
+      border: 2px solid rgba(0,191,166,0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .pipeline-stage:hover {
+      background: rgba(0,191,166,0.2);
+      border-color: rgba(0,191,166,0.5);
+      transform: scale(1.05);
+    }
+    
+    .pipeline-stage h3 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 10px 0;
+    }
+    
+    .pipeline-stage p {
+      color: #cfd8dc;
+      font-size: 14px;
+      margin: 0;
+    }
+    
+    .pipeline-arrow {
+      color: #00bfa6;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Code Block Styles */
+    .code-container {
+      margin-top: 30px;
+    }
+    
+    .code-block {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .code-header {
+      background: #2d2d2d;
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+    }
+    
+    .code-header h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 16px;
+      margin: 0;
+    }
+    
+    .code-header p {
+      color: #cfd8dc;
+      font-size: 14px;
+      margin: 8px 0 0 0;
+    }
+    
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* Areas Analysis Styles */
+    .areas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+    
+    .area-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .area-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+    }
+    
+    .area-card h4 {
+      color: #00bfa6;
+      font-size: 16px;
+      margin: 0 0 8px 0;
+    }
+    
+    .area-card p {
+      color: #cfd8dc;
+      font-size: 12px;
+      margin: 0;
+    }
+
+    /* Rationale Grid */
+    .rationale-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .rationale-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .rationale-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+    }
+    
+    .rationale-card h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+    
+    .rationale-card p {
+      color: #cfd8dc;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Mobile App Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .feature-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .feature-card h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+    
+    .feature-card p {
+      color: #cfd8dc;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Impact Metrics Grid */
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .impact-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .impact-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .impact-card .metric-number {
+      display: block;
+      font-family: 'Passion One', cursive;
+      font-size: 36px;
+      color: #00bfa6;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    
+    .impact-card .metric-label {
+      color: #cfd8dc;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Future Enhancements */
+    .enhancements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .enhancement-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .enhancement-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .enhancement-card h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+    
+    .enhancement-card p {
+      color: #cfd8dc;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Responsive Design Updates */
+    @media (max-width: 768px) {
+      .pipeline {
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .pipeline-arrow {
+        transform: rotate(90deg);
+      }
+      
+      .areas-grid,
+      .rationale-grid,
+      .features-grid,
+      .impact-grid,
+      .enhancements-grid,
+      .data-sources-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Data Sources Styles */
+    .data-sources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+    
+    .data-category {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .data-category:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .category-title {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .data-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .data-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .data-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(0,191,166,0.2);
+    }
+    
+    .data-item.nasa {
+      border-left: 3px solid #00bfa6;
+    }
+    
+    .data-item.municipal {
+      border-left: 3px solid #4caf50;
+    }
+    
+    .data-item.generated {
+      border-left: 3px solid #ff9800;
+    }
+    
+    .data-item h4 {
+      color: #e6f0ea;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 6px 0;
+    }
+    
+    .data-item p {
+      color: #cfd8dc;
+      font-size: 12px;
+      margin: 0 0 8px 0;
+      line-height: 1.4;
+    }
+    
+    .data-type {
+      display: inline-block;
+      background: rgba(0,191,166,0.1);
+      color: #00bfa6;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .data-integration-note {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0,191,166,0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(0,191,166,0.2);
+    }
+    
+    .data-integration-note h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 16px;
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .data-integration-note p {
+      color: #cfd8dc;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Mobile App Features - Fix styling */
+    .mobile-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .mobile-features .feature-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .mobile-features .feature-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .mobile-features .feature-title {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+    
+    .mobile-features .feature-description {
+      color: #cfd8dc;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Future Enhancements - Fix styling */
+    .future-roadmap {
+      margin-top: 30px;
+    }
+    
+    .roadmap-phase {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .roadmap-phase:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+      transform: translateY(-4px);
+    }
+    
+    .phase-title {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+    
+    .phase-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .phase-features li {
+      color: #cfd8dc;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .phase-features li:before {
+      content: "•";
+      color: #00bfa6;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    /* Engagement Framework Styles */
+    .engagement-framework {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0,191,166,0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(0,191,166,0.2);
+    }
+    
+    .engagement-framework h4 {
+      color: #00bfa6;
+      font-family: 'Passion One', cursive;
+      font-size: 18px;
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .framework-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    
+    .framework-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .framework-item:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(0,191,166,0.3);
+    }
+    
+    .framework-item h5 {
+      color: #e6f0ea;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    
+    .framework-item p {
+      color: #cfd8dc;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+    }
+    /* Fix timeline dot positioning */
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: #00bfa6;
+  border-radius: 50%;
+  border: 4px solid #0b0f13;
+  z-index: 2;
+}
+
+/* For even items (right side) */
+.timeline-item:nth-child(even) .timeline-dot {
+  left: calc(100% + 8px); /* Position on the left edge of the box */
+}
+
+/* For odd items (left side) */
+.timeline-item:nth-child(odd) .timeline-dot {
+  left: -8px; /* Position on the right edge of the box */
+}
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <div id="topNav">
+    <div class="nav-left">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="project_plan.html" class="active">Project Plan</a>
+      <a href="mobileapp.html">Mobile App</a>
+    </div>
+    <div class="nav-right">
+    </div>
+  </div>
+
+  <!-- Left Dashboard Panel -->
+  <div id="dashboardPanel">
+    <div class="logo-container">
+      <img src="images/logo2.svg" alt="SPHERIX Logo" class="logo-img">
+    </div>
+    
+    <div class="panel-section">
+      <h2>Project Plan Navigation</h2>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#overview" class="nav-link">Overview</a></li>
+          <li><a href="#architecture" class="nav-link">Technical Architecture</a></li>
+          <li><a href="#methodology" class="nav-link">Data Methodology</a></li>
+          <li><a href="#challenges" class="nav-link">Challenge Solutions</a></li>
+          <li><a href="#stakeholders" class="nav-link">Stakeholder Engagement</a></li>
+          <li><a href="#timeline" class="nav-link">Implementation Timeline</a></li>
+          <li><a href="#data-processing" class="nav-link">Data Processing</a></li>
+          <li><a href="#data-sources" class="nav-link">Data Sources</a></li>
+          <li><a href="#areas-analysis" class="nav-link">13 Areas Analysis</a></li>
+          <li><a href="#mobile-app" class="nav-link">Mobile App</a></li>
+          <li><a href="#impact" class="nav-link">Impact Metrics</a></li>
+          <li><a href="#future" class="nav-link">Future Enhancements</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div id="mainContent">
+    <!-- Hero Section -->
+    <section id="overview" class="hero-section fade-in">
+      <h1 class="hero-title">SPHERIX Project Plan</h1>
+      <p class="hero-subtitle">NASA Earth Observation Data for smart Urban Planning in the UAE</p>
+      
+      <div style="max-width: 800px; margin: 0 auto 40px auto; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+        <p style="color: #cfd8dc; font-size: 16px; line-height: 1.6; margin: 0;">
+          SPHERIX addresses NASA's urban planning challenge by demonstrating how satellite data can guide smart city growth while maintaining environmental wellbeing. Our solution combines NASA Earth observation datasets with AI-powered insights to help urban planners make data-driven decisions for climate-resilient development in fast-growing cities.
+        </p>
+      </div>
+      <p class="hero-subtitle">Demo Dashboard Highlights</p>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-number">6</span>
+          <span class="stat-label">NASA/Other <br> Datasets</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">8</span>
+          <span class="stat-label">Cross-Metrics</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">6</span>
+          <span class="stat-label">GEE Scripts</span>  <!-- ADD THIS -->
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">13</span>
+          <span class="stat-label">Analysis Areas</span><br>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">4</span>
+          <span class="stat-label">Time Periods</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Architecture -->
+    <section id="architecture" class="content-section fade-in">
+      <h2 class="section-title">Technical Architecture</h2>
+      <p class="section-subtitle">End-to-end data pipeline from NASA satellites to urban planning insights</p>
+      
+      <div class="architecture-diagram">
+        <div class="arch-component">
+          <h3 class="arch-title">NASA/Other Data</h3>
+          <p class="arch-description">MODIS, VIIRS, TROPOMI, WorldPop satellite data</p>
+        </div>
+        <div class="arch-component">
+          <h3 class="arch-title">Python Processing</h3>
+          <p class="arch-description">Statistical analysis and cross-metric calculations</p>
+        </div>
+        <div class="arch-component">
+          <h3 class="arch-title">Intelligence Layer</h3>
+          <p class="arch-description">AI-powered recommendations and predictions</p>
+        </div>
+        <div class="arch-component">
+          <h3 class="arch-title">Dual Platforms</h3>
+          <p class="arch-description">Web dashboard and mobile application</p>
+        </div>
+      </div>
+    </section>
+<!-- Data Collection Methodology -->
+<section id="methodology" class="content-section fade-in">
+  <h2 class="section-title">Data Collection Methodology</h2>
+  <p class="section-subtitle">Google Earth Engine scripts for automated NASA satellite data processing</p>
+  
+  <div class="code-section">
+    <div class="code-header">
+      <span class="code-title">🛰️ Automated GEE Pipeline</span>
+    </div>
+    <div class="code-content">
+      <pre><code class="language-javascript">// Key Features of Our GEE Scripts:
+// • 13 AOIs processed in batch
+// • Global min/max scaling for consistent coloring
+// • Dual exports: Centroids + Full coordinates
+// • Dynamic resolution scaling (100m-1000m)
+// • Cloud masking & quality filtering
+// • Time-series analysis for temporal trends</code></pre>
+    </div>
+    <div style="padding: 16px; background: rgba(0,191,166,0.1); border-top: 1px solid rgba(0,191,166,0.2);">
+      <p style="color: #cfd8dc; font-size: 14px; margin: 0; line-height: 1.5;">
+        <strong>Automated Processing:</strong> Our GEE scripts handle 6 NASA datasets across 13 areas, exporting both statistical GeoJSON and colored visualizations. Features include dynamic scaling (higher resolution for smaller areas like Jubail), cloud masking, and consistent color scaling across all regions.
+      </p>
+    </div>
+  </div>
+</section>
+    <!-- Challenge Solutions -->
+    <section id="challenges" class="content-section fade-in">
+      <h2 class="section-title">Challenge Solutions</h2>
+      <p class="section-subtitle">Addressing NASA's specific urban planning challenges with data-driven solutions from our dashboard</p>
+      
+      <div class="solutions-grid">
+        <div class="solution-card">
+          <h3 class="solution-title">🌡️ Extreme Heat Monitoring</h3>
+          <p class="solution-description">MODIS LST Summer data (2018-2024) enables real-time identification of Sharjah's hottest areas. Our dashboard shows thermal patterns across 13 areas, helping planners prioritize cooling infrastructure and emergency response in vulnerable neighborhoods like Industrial and Halwan.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">🌱 Green Space Assessment</h3>
+          <p class="solution-description">NDVI March data reveals vegetation coverage gaps across Sharjah. Our cross-metric analysis shows which areas (like Muwaileh Suburb) have low green space access, enabling Parks & Recreation to strategically plan urban canopy expansion and pocket park development.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">🏗️ Housing Development Guidance</h3>
+          <p class="solution-description">NDBI built-up intensity data combined with population density identifies optimal locations for sustainable housing. Our AI advisor provides specific recommendations for areas like Majaz and Mughaider Suburb, balancing development needs with environmental protection.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">🚗 Transportation Planning</h3>
+          <p class="solution-description">VIIRS night light data reveals urbanization patterns and transportation needs. Our dashboard shows which areas (like Zahia and Yarmouk) need better connectivity, guiding infrastructure investments and public transit route optimization.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">🏥 Healthcare Facility Placement</h3>
+          <p class="solution-description">Population density mapping combined with environmental health risks (heat, air quality) identifies underserved communities. Our analysis helps determine optimal locations for new healthcare facilities to serve growing populations in areas like Jubail and Mussalla.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">🌿 Ecosystem Conservation</h3>
+          <p class="solution-description">Multi-temporal NDVI analysis tracks vegetation health across Sharjah. Our dashboard monitors environmental changes, helping planners protect natural habitats and implement green infrastructure in areas like Noaf and Qasmiyah.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">⚡ Energy Infrastructure</h3>
+          <p class="solution-description">VIIRS night light brightness data identifies areas with limited electricity access. Our analysis guides renewable energy deployment and grid expansion in underserved communities, ensuring equitable access to power across all 13 areas.</p>
+        </div>
+        
+        <div class="solution-card">
+          <h3 class="solution-title">♻️ Waste Management</h3>
+          <p class="solution-description">Population density and urbanization data optimize waste collection routes and facility placement. Our dashboard helps planners identify efficient collection patterns and locate waste processing facilities to serve growing communities like Abushagarah and Ghuwair.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stakeholder Engagement -->
+    <section id="stakeholders" class="content-section fade-in">
+      <h2 class="section-title">Stakeholder Engagement</h2>
+      <p class="section-subtitle">Multi-sector collaboration for comprehensive urban planning</p>
+      
+      <div class="stakeholder-grid">
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🏛️</span>
+          <h3 class="stakeholder-title">Sharjah Municipality</h3>
+          <p class="stakeholder-role">Primary implementation partner using dashboard insights for policy decisions, zoning regulations, and infrastructure investments across the 13 analysis areas.</p>
+        </div>
+        
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🏙️</span>
+          <h3 class="stakeholder-title">Urban Planning Department</h3>
+          <p class="stakeholder-role">Strategic oversight of development projects, using cross-metric analysis to balance growth with environmental protection and community needs.</p>
+        </div>
+        
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🌳</span>
+          <h3 class="stakeholder-title">Parks & Recreation</h3>
+          <p class="stakeholder-role">Green space expansion planning based on NDVI analysis, implementing urban canopy strategies in underserved areas identified through our dashboard.</p>
+        </div>
+        
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🏥</span>
+          <h3 class="stakeholder-title">Department of Health</h3>
+          <p class="stakeholder-role">Environmental health monitoring using air quality and heat data to protect vulnerable populations and guide healthcare facility placement.</p>
+        </div>
+        
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🏠</span>
+          <h3 class="stakeholder-title">Community Residents</h3>
+          <p class="stakeholder-role">Mobile app users providing local insights, reporting environmental issues, and participating in citizen science initiatives for neighborhood improvement.</p>
+        </div>
+        
+        <div class="stakeholder-card">
+          <span class="stakeholder-icon">🔬</span>
+          <h3 class="stakeholder-title">Academic Partners</h3>
+          <p class="stakeholder-role">Universities and research institutions validating dashboard findings, contributing to methodology refinement, and training municipal staff in data analysis.</p>
+        </div>
+      </div>
+      
+      <div class="engagement-framework">
+        <h4>🤝 Engagement Framework</h4>
+        <div class="framework-grid">
+          <div class="framework-item">
+            <h5>Monthly Dashboard Reviews</h5>
+            <p>Regular sessions with municipal departments to review environmental trends, validate AI recommendations, and plan interventions.</p>
+          </div>
+          <div class="framework-item">
+            <h5>Community Workshops</h5>
+            <p>Quarterly public meetings in each of the 13 areas to share findings, gather local feedback, and co-design neighborhood solutions.</p>
+          </div>
+          <div class="framework-item">
+            <h5>Training Programs</h5>
+            <p>Comprehensive training for municipal staff on interpreting NASA satellite data and using dashboard insights for evidence-based planning.</p>
+          </div>
+          <div class="framework-item">
+            <h5>Pilot Implementation</h5>
+            <p>Targeted interventions in 2-3 areas to demonstrate the effectiveness of data-driven planning before city-wide rollout.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Implementation Timeline -->
+<!-- Implementation Timeline -->
+<section id="timeline" class="content-section fade-in">
+  <h2 class="section-title">Implementation Timeline</h2>
+  <p class="section-subtitle">Proposed rollout plan for full SPHERIX deployment following successful hackathon prototype</p>
+  
+  <div style="max-width: 800px; margin: 0 auto 40px auto; padding: 20px; background: rgba(0,191,166,0.1); border-radius: 12px; border: 1px solid rgba(0,191,166,0.2);">
+    <p style="color: #cfd8dc; font-size: 16px; line-height: 1.6; margin: 0; text-align: center;">
+      <strong>Hackathon Achievement:</strong> Successfully developed a working demo dashboard and Figma prototype during the 2025 NASA Space Apps Challenge, validating our technical approach and user experience.
+    </p>
+  </div>
+  
+  <div class="timeline-container">
+    <div class="timeline-line"></div>
+    
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-date">Q1 2026</h3>
+        <h4 class="timeline-title">System Architecture & Data Integration</h4>
+        <p class="timeline-description">Finalize cloud infrastructure, enhance Python processing pipeline, <strong>optimize GEE automation scripts</strong>, and integrate additional NASA datasets for production environment.</p>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-date">Q2 2026</h3>
+        <h4 class="timeline-title">Mobile App Development & Stakeholder Workshops</h4>
+        <p class="timeline-description">Build production-ready mobile application and conduct training workshops with Sharjah Municipality departments for requirement gathering.</p>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-date">Q3 2026</h3>
+        <h4 class="timeline-title">Pilot Deployment & Validation</h4>
+        <p class="timeline-description">Launch pilot program in 2-3 areas, collect user feedback, validate AI recommendations, and refine algorithms based on real-world usage.</p>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <div class="timeline-dot"></div>
+        <h3 class="timeline-date">Q4 2026</h3>
+        <h4 class="timeline-title">Full City-Wide Deployment</h4>
+        <p class="timeline-description">Complete rollout across Sharjah, establish ongoing monitoring protocols, and integrate with municipal planning workflows.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Data Processing -->
+    <section id="data-processing" class="content-section fade-in">
+      <h2 class="section-title">Data Processing (Dashboard Demo)</h2>
+      <p class="section-subtitle">Python-powered analysis pipeline for NASA satellite data</p>
+      
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-title">📊 process_data.py</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-python">def process_csv(path: Path) -> Dict[str, Any]:
+    """Process CSV datasets from DATASETS/CSV_DATA and export compact JSON stats"""
+    category = infer_category(path.name)
+    year = infer_year(path.name, category)
+    
+    # Load CSV and identify area column
+    df = pd.read_csv(path)
+    area_col = find_area_column(df)
+    cand = metric_candidates(list(df.columns))
+    
+    # Extract statistics for each area
+    grouped = df.groupby(area_col, dropna=True)
+    for area, g in grouped:
+        area_key = normalize_area_key(area)
+        if preferred_col and preferred_col in g.columns:
+            stats = summarize_group(g, preferred_col)
+            stats["records"] = [normalize_record(r) for r in g.to_dict(orient='records')]
+        
+        stats["units"] = units or CATEGORY_UNITS.get(category, "")
+        result[year][area_key] = stats</code></pre>
+        </div>
+        <div style="padding: 16px; background: rgba(0,191,166,0.1); border-top: 1px solid rgba(0,191,166,0.2);">
+          <p style="color: #cfd8dc; font-size: 14px; margin: 0; line-height: 1.5;">
+            <strong>Purpose:</strong> Processes NASA satellite data CSV files into structured JSON statistics. Handles MODIS LST (heat), NDVI (vegetation), NDBI (housing), VIIRS NTL (light), TROPOMI NO₂ (air quality), and WorldPop (population) datasets. Automatically detects area columns and calculates comprehensive statistics (mean, median, percentiles) for each geographic area across multiple years.
+          </p>
+        </div>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-title">🔗 cross_metrics.py</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-python">def recommend_for_pair(a_cat, a_label, a_sev, b_cat, b_label, b_sev):
+    """Generate urban planning recommendations based on cross-metric analysis"""
+    maxsev = max(a_sev, b_sev)
+    
+    # Housing/Green correlation analysis
+    if a_cat == 'housing' and b_cat == 'green':
+        if a_sev==2 and b_sev>=1:
+            return 'High built area and low vegetation — prioritise greening (street trees, pocket parks, urban canopy).'
+    
+    # Heat/Population correlation analysis  
+    if a_cat in ('housing','population') and b_cat == 'heat':
+        heat_sev = a_sev if a_cat == 'heat' else b_sev
+        if heat_sev >= 2:
+            return 'High exposure to heat in populated areas — implement cooling measures (shading, cool roofs, tree planting).'
+    
+    # Air quality/Population analysis
+    if a_cat in ('population','housing') and b_cat == 'air':
+        air_sev = a_sev if a_cat == 'air' else b_sev
+        if air_sev >= 2:
+            return 'High population with poor air quality — investigate pollution sources and protect residents.'</code></pre>
+        </div>
+        <div style="padding: 16px; background: rgba(0,191,166,0.1); border-top: 1px solid rgba(0,191,166,0.2);">
+          <p style="color: #cfd8dc; font-size: 14px; margin: 0; line-height: 1.5;">
+            <strong>Purpose:</strong> Performs cross-metric correlation analysis between different NASA datasets to identify urban planning challenges. Computes 8 key correlations (housing×population, housing×light, housing×green, etc.) and generates actionable recommendations. Uses semantic analysis to determine if high values are good (vegetation) or bad (pollution, heat), then provides severity-based recommendations for urban planners.
+          </p>
+        </div>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-title">🔮 generate_predictions.py</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-python">def fit_and_predict(series):
+    """Generate predictions for 2026, 2028, 2030 using linear/quadratic models"""
+    years = sorted(list(series.keys()))
+    x = np.array(years, dtype=float)
+    y = np.array([series[y] for y in years], dtype=float)
+    
+    # Linear regression
+    coef1 = np.polyfit(x, y, 1)
+    slope1, intercept1 = float(coef1[0]), float(coef1[1])
+    yhat1 = slope1 * x + intercept1
+    r2_1 = compute_r2(y, yhat1)
+    
+    # Quadratic if 3+ data points
+    if len(x) >= 3:
+        coef2 = np.polyfit(x, y, 2)
+        a, b, c = float(coef2[0]), float(coef2[1]), float(coef2[2])
+        yhat2 = a * x**2 + b * x + c
+        r2_2 = compute_r2(y, yhat2)
+    
+    # Choose best model by R²
+    best_model = 'linear' if r2_1 >= r2_2 else 'quadratic'
+    
+    # Generate predictions for 2026, 2028, 2030
+    preds = {ty: float(slope1 * ty + intercept1) for ty in [2026, 2028, 2030]}</code></pre>
+        </div>
+        <div style="padding: 16px; background: rgba(0,191,166,0.1); border-top: 1px solid rgba(0,191,166,0.2);">
+          <p style="color: #cfd8dc; font-size: 14px; margin: 0; line-height: 1.5;">
+            <strong>Purpose:</strong> Generates future predictions for urban planning using statistical modeling. Processes historical NASA satellite data (2018-2024) to predict environmental trends for 2026, 2028, and 2030. Uses linear and quadratic regression models, automatically selecting the best fit based on R² values. Special handling for population data using compound annual growth rates. Outputs predictions with confidence metrics and trend analysis for long-term urban planning decisions.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Sources -->
+    <section id="data-sources" class="content-section fade-in">
+      <h2 class="section-title">Data Sources & Integration (Demo Dashboard)</h2>
+      <p class="section-subtitle">Multi-year satellite data ecosystem (2018-2024) supporting evidence-based urban planning</p>
+      
+      <div class="data-sources-grid">
+        <div class="data-category">
+          <h3 class="category-title">🌍 NASA & ESA Earth Observation Data</h3>
+          <div class="data-list">
+            <div class="data-item nasa">
+              <h4>MODIS Land Surface Temperature (LST)</h4>
+              <p>Summer thermal data (2018-2024) for urban heat island analysis and extreme heat monitoring</p>
+              <span class="data-type">NASA MODIS</span>
+            </div>
+            <div class="data-item nasa">
+              <h4>Sentinel-2 NDVI Vegetation Index</h4>
+              <p>Annual March vegetation data (2018-2024) for green space assessment and urban canopy planning</p>
+              <span class="data-type">ESA Sentinel-2</span>
+            </div>
+            <div class="data-item nasa">
+              <h4>Sentinel-2 NDBI Built-up Index</h4>
+              <p>Annual urban development intensity (2018-2024) for housing and infrastructure planning</p>
+              <span class="data-type">ESA Sentinel-2</span>
+            </div>
+            <div class="data-item nasa">
+              <h4>VIIRS Nighttime Lights</h4>
+              <p>Annual urbanization patterns (2018-2024) for energy consumption and development monitoring</p>
+              <span class="data-type">NASA VIIRS</span>
+            </div>
+            <div class="data-item nasa">
+              <h4>TROPOMI NO₂ Air Quality</h4>
+              <p>Atmospheric pollution monitoring (2018-2024) for public health planning</p>
+              <span class="data-type">ESA TROPOMI</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="data-category">
+          <h3 class="category-title">🏛️ Demographic & Municipal Data</h3>
+          <div class="data-list">
+            <div class="data-item municipal">
+              <h4>WorldPop Population Density</h4>
+              <p>2020 baseline population distribution with annual projections</p>
+              <span class="data-type">WorldPop</span>
+            </div>
+            <div class="data-item municipal">
+              <h4>Sharjah 13 Areas Boundaries</h4>
+              <p>Custom AOI geometries for targeted multi-year urban analysis</p>
+              <span class="data-type">Municipal GIS</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="data-category">
+          <h3 class="category-title">🛠️ GEE Processing Features</h3>
+          <div class="data-list">
+            <div class="data-item generated">
+              <h4>Multi-Year Time Series</h4>
+              <p>Consistent processing across 2018-2024 for trend analysis</p>
+              <span class="data-type">GEE Automation</span>
+            </div>
+            <div class="data-item generated">
+              <h4>Dynamic Resolution Scaling</h4>
+              <p>100m-1000m resolution based on AOI size (e.g., 100m for Jubail)</p>
+              <span class="data-type">GEE Processing</span>
+            </div>
+            <div class="data-item generated">
+              <h4>Global Color Scaling</h4>
+              <p>Consistent min/max values across all years and areas</p>
+              <span class="data-type">GEE Processing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="data-integration-note">
+        <h4>🔗 Advanced Multi-Year GEE Processing Pipeline</h4>
+        <p>All datasets processed through automated Google Earth Engine scripts across 2018-2024 featuring: <strong>cloud masking</strong> (Sentinel-2), <strong>dynamic resolution scaling</strong>, <strong>global min/max normalization</strong> for consistent multi-year comparison, and <strong>batch processing</strong> of all 13 areas annually. Exports include both statistical GeoJSON and colored GeoTIFF visualizations for comprehensive temporal urban planning analysis.</p>
+      </div>
+    </section>
+
+    <!-- 13 Areas Analysis -->
+    <section id="areas-analysis" class="content-section fade-in">
+      <h2 class="section-title">13 Areas Analysis Strategy (Demo Dashboard)</h2>
+      <p class="section-subtitle">Strategic selection of representative areas for comprehensive urban planning insights</p>
+      
+      <div class="areas-grid">
+        <div class="area-card">
+          <h3 class="area-name">Zahia</h3>
+          <p class="area-type">Urban Residential</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Yarmouk</h3>
+          <p class="area-type">Established Community</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Qasmiyah</h3>
+          <p class="area-type">Traditional Neighborhood</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Noaf</h3>
+          <p class="area-type">Suburban Residential</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Muwaileh Suburb</h3>
+          <p class="area-type">Modern Suburb</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Mussalla</h3>
+          <p class="area-type">Mixed Use</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Mughaider Suburb</h3>
+          <p class="area-type">Emerging Development</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Majaz</h3>
+          <p class="area-type">Commercial District</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Jubail</h3>
+          <p class="area-type">Industrial Port</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Industrial</h3>
+          <p class="area-type">Industrial Zone</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Halwan</h3>
+          <p class="area-type">Educational Hub</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Ghuwair</h3>
+          <p class="area-type">Heritage Area</p>
+        </div>
+        <div class="area-card">
+          <h3 class="area-name">Abushagarah</h3>
+          <p class="area-type">Rural-Urban Transition</p>
+        </div>
+      </div>
+
+      <div class="solution-card" style="margin-top: 40px;">
+        <h3 class="solution-title">Strategic Selection Rationale</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">Urban Development Spectrum</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Comprehensive coverage from dense urban cores (Majaz, Jubail) to suburban communities (Muwaileh, Mughaider) and rural-urban transitions (Abushagarah), enabling analysis across all development stages.
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">Population Density Variation</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Areas ranging from high-density urban cores to low-density suburban and rural communities, enabling population distribution analysis for service planning and infrastructure development.
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">Environmental Conditions</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Diverse geographic locations including coastal areas (Jubail), inland communities (Halwan, Ghuwair), and transition zones for comprehensive environmental impact analysis.
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">Cross-Metric Validation</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Strategic selection enables robust correlation analysis between NASA datasets, revealing relationships between heat islands, air quality, vegetation, and urbanization patterns.
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">Planning Challenge Representation</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Areas facing diverse urban planning challenges: heat mitigation (industrial zones), air quality (traffic corridors), green space access (dense urban areas), and sustainable growth (suburban expansion).
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #00bfa6; margin-bottom: 12px;">NASA Challenge Alignment</h4>
+            <p style="color: #cfd8dc; font-size: 14px; line-height: 1.6;">
+              Directly addresses NASA's challenge questions about extreme heat vulnerability, air quality impacts, green space access, housing development needs, and ecosystem protection across different community types.
+            </p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(0,191,166,0.1); border-radius: 8px; border: 1px solid rgba(0,191,166,0.2);">
+          <h4 style="color: #00bfa6; margin: 0 0 12px 0;">Comprehensive Regional Coverage</h4>
+          <p style="color: #cfd8dc; margin: 0; line-height: 1.6;">
+            These 13 areas provide complete coverage of Sharjah Emirate's diverse urban landscape, enabling NASA satellite data to inform evidence-based urban planning decisions across different community types, environmental conditions, and development challenges. The selection ensures our dashboard can guide city officials in addressing NASA's challenge questions about extreme heat, air quality, green space access, housing development, and environmental protection.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile App Integration -->
+    <section id="mobile-app" class="content-section fade-in">
+      <h2 class="section-title">Mobile App Integration</h2>
+      <p class="section-subtitle">SPHERIX Mobile App - Citizen Engagement & Real-time Urban Planning</p>
+      
+      <div class="mobile-features">
+        <div class="feature-card">
+          <h3 class="feature-title">🌡️ Environmental Monitoring</h3>
+          <p class="feature-description">Real-time risk badges for heat, air quality, and green space access with NASA satellite imagery overlays</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3 class="feature-title">📱 Personalized Recommendations</h3>
+          <p class="feature-description">AI-powered daily tasks (plant trees, avoid heat exposure) with confidence scores and source attribution</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3 class="feature-title">🚨 Emergency Alerts</h3>
+          <p class="feature-description">Push notifications for extreme weather, air quality drops, and flood warnings with safety guidance</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3 class="feature-title">📊 Community Reporting</h3>
+          <p class="feature-description">One-tap issue reporting (litter, blocked drains) with photo uploads routed to municipal departments</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3 class="feature-title">🌱 Volunteer Engagement</h3>
+          <p class="feature-description">Sign up for sustainability drives, tree planting events, and community clean-up initiatives</p>
+        </div>
+        
+        <div class="feature-card">
+          <h3 class="feature-title">📈 Impact Tracking</h3>
+          <p class="feature-description">Personal dashboard showing trees planted, reports filed, and community impact with gamified badges</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Impact Metrics -->
+    <section id="impact" class="content-section fade-in">
+      <h2 class="section-title">Expected Impact & Outcomes</h2>
+      <p class="section-subtitle">Measurable improvements in urban planning effectiveness and environmental outcomes</p>
+      
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-percentage">35%</div>
+          <h3 class="metric-label">Urban Heat Reduction</h3>
+          <p class="metric-description">Decrease in heat island intensity through targeted green infrastructure guided by MODIS LST data</p>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-percentage">25%</div>
+          <h3 class="metric-label">Air Quality Improvement</h3>
+          <p class="metric-description">Reduction in pollution exposure through strategic planning based on TROPOMI NO₂ analysis</p>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-percentage">40%</div>
+          <h3 class="metric-label">Green Space Access</h3>
+          <p class="metric-description">Increase in park accessibility through NDVI-guided development in underserved areas</p>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-percentage">60%</div>
+          <h3 class="metric-label">Citizen Engagement</h3>
+          <p class="metric-description">Increase in community participation through mobile app features and real-time environmental data</p>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-percentage">50%</div>
+          <h3 class="metric-label">Emergency Response</h3>
+          <p class="metric-description">Faster response to environmental hazards through automated monitoring and alert systems</p>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-percentage">85%</div>
+          <h3 class="metric-label">Data-Driven Planning</h3>
+          <p class="metric-description">Increase in evidence-based urban planning decisions using NASA satellite data insights</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future Improvements -->
+    <section id="future" class="content-section fade-in">
+      <h2 class="section-title">Future Enhancements</h2>
+      <p class="section-subtitle">Expanding SPHERIX capabilities for comprehensive urban planning solutions</p>
+      
+      <div class="future-roadmap">
+        <div class="roadmap-phase">
+          <h3 class="phase-title">Phase 1: Enhanced Data Integration (Q1 2027)</h3>
+          <ul class="phase-features">
+            <li>Integration of additional NASA datasets (SMAP soil moisture, GRACE water storage)</li>
+            <li>Real-time satellite data streaming for live environmental monitoring</li>
+            <li>Machine learning models for predictive urban planning scenarios</li>
+          </ul>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3 class="phase-title">Phase 2: Multi-City Expansion (Q3 2027)</h3>
+          <ul class="phase-features">
+            <li>Extension to other UAE emirates and Gulf region cities</li>
+            <li>Cross-city comparison and best practice sharing</li>
+            <li>Regional climate resilience planning tools</li>
+          </ul>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3 class="phase-title">Phase 3: Advanced Analytics (Q1 2028)</h3>
+          <ul class="phase-features">
+            <li>AI-powered urban planning recommendations with confidence intervals</li>
+            <li>Scenario modeling for climate change adaptation</li>
+            <li>Integration with IoT sensors and smart city infrastructure</li>
+          </ul>
+        </div>
+        
+        <div class="roadmap-phase">
+          <h3 class="phase-title">Phase 4: Global Scaling (Q3 2028)</h3>
+          <ul class="phase-features">
+            <li>Adaptation for different climate zones and urban contexts</li>
+            <li>Open-source platform for global urban planning community</li>
+            <li>Partnership with international urban planning organizations</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Smooth scrolling navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Active navigation highlighting
+    function updateActiveNav() {
+      const sections = document.querySelectorAll('.content-section, .hero-section');
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      let currentSection = '';
+      const scrollPos = window.scrollY + 100;
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        
+        if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    // Intersection Observer for fade-in animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all fade-in elements
+    document.querySelectorAll('.fade-in').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Scroll event listener
+    window.addEventListener('scroll', updateActiveNav);
+    
+    // Initialize
+    updateActiveNav();
+  </script>
+</body>
+</html>

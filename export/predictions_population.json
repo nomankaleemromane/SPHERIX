@@ -1,0 +1,264 @@
+{
+  "population": {
+    "abushagarah": {
+      "history": {
+        "2020": 22.704708099365234
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 24.826310131034813,
+          "2028": 25.57668535474534,
+          "2030": 26.34974066959251
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 22.704708099365234,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "ghuwair": {
+      "history": {
+        "2020": 21.16234016418457
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.1398183017904,
+          "2028": 23.83921930996201,
+          "2030": 24.559759713605608
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.16234016418457,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "halwan": {
+      "history": {
+        "2020": 21.514629364013672
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.525026554303274,
+          "2028": 24.23607048190709,
+          "2030": 24.968605712222722
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.514629364013672,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "industrial": {
+      "history": {
+        "2020": 22.87372398376465
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 25.01111941133066,
+          "2028": 25.767080495538128,
+          "2030": 26.545890503515764
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 22.87372398376465,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "jubail": {
+      "history": {
+        "2020": 23.13269424438477
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 25.294288698367204,
+          "2028": 26.05880857427535,
+          "2030": 26.846436063432815
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 23.13269424438477,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "majaz": {
+      "history": {
+        "2020": 23.63746452331543
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 25.84622635970238,
+          "2028": 26.627428551424384,
+          "2030": 27.43224257939118
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 23.63746452331543,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "mughaider_suburb": {
+      "history": {
+        "2020": 21.553268432617188
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.567276183592803,
+          "2028": 24.279597106241894,
+          "2030": 25.01344792877805
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.553268432617188,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "mussalla": {
+      "history": {
+        "2020": 21.233421325683597
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.217541519024728,
+          "2028": 23.91929171143725,
+          "2030": 24.642252303415436
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.233421325683597,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "muwaileh_suburb": {
+      "history": {
+        "2020": 22.616079330444336
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 24.729399600666728,
+          "2028": 25.47684570359688,
+          "2030": 26.24688336498809
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 22.616079330444336,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "noaf": {
+      "history": {
+        "2020": 22.616079330444336
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 24.729399600666728,
+          "2028": 25.47684570359688,
+          "2030": 26.24688336498809
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 22.616079330444336,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "qasmiyah": {
+      "history": {
+        "2020": 23.189361572265625
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 25.356251206324153,
+          "2028": 26.1226438990353,
+          "2030": 26.912200810883636
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 23.189361572265625,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "yarmouk": {
+      "history": {
+        "2020": 21.22454833984375
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.207839412427088,
+          "2028": 23.909296358667696,
+          "2030": 24.63195484110842
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.22454833984375,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    },
+    "zahia": {
+      "history": {
+        "2020": 21.816797256469727
+      },
+      "prediction": {
+        "predictions": {
+          "2026": 23.85543000088909,
+          "2028": 24.576460372665963,
+          "2030": 25.319283887429783
+        },
+        "model_type": "cagr",
+        "cagr": 0.015,
+        "num_points": 1,
+        "last_year": 2020,
+        "last_value": 21.816797256469727,
+        "trend": "increasing",
+        "warning": "Population predicted using a fixed CAGR from 2020 baseline."
+      },
+      "units": "People/km\u00b2 (population density, 2020 baseline)"
+    }
+  }
+}
