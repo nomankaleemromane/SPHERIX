@@ -1226,6 +1226,7 @@
           <li><a href="#stakeholders" class="nav-link">Stakeholder Engagement</a></li>
           <li><a href="#timeline" class="nav-link">Implementation Timeline</a></li>
           <li><a href="#data-processing" class="nav-link">Data Processing</a></li>
+          <li><a href="#ai-advisor" class="nav-link">AI Urban Advisor</a></li>
           <li><a href="#data-sources" class="nav-link">Data Sources</a></li>
           <li><a href="#areas-analysis" class="nav-link">13 Areas Analysis</a></li>
           <li><a href="#mobile-app" class="nav-link">Mobile App</a></li>
@@ -1288,8 +1289,8 @@
           <p class="arch-description">Statistical analysis and cross-metric calculations</p>
         </div>
         <div class="arch-component">
-          <h3 class="arch-title">Intelligence Layer</h3>
-          <p class="arch-description">AI-powered recommendations and predictions</p>
+          <h3 class="arch-title">AI Intelligence Layer</h3>
+          <p class="arch-description">GPT-4 powered Urban Advisor with chat interface and automated recommendations</p>
         </div>
         <div class="arch-component">
           <h3 class="arch-title">Dual Platforms</h3>
@@ -1597,7 +1598,86 @@
         </div>
       </div>
     </section>
+<!-- AI Urban Advisor -->
+<section id="ai-advisor" class="content-section fade-in">
+  <h2 class="section-title">AI Urban Advisor</h2>
+  <p class="section-subtitle">GPT-4 powered intelligence for data-driven urban planning recommendations</p>
+  
+  <div class="solutions-grid">
+    <div class="solution-card">
+      <h3 class="solution-title">🤖 Intelligent Analysis</h3>
+      <p class="solution-description">Real-time analysis of selected NASA datasets and areas using OpenAI's GPT-4 model. The AI processes current environmental data, cross-metrics correlations, and historical trends to generate actionable urban planning recommendations.</p>
+    </div>
+    
+    <div class="solution-card">
+      <h3 class="solution-title">📊 Multi-Area Comparative Analysis</h3>
+      <p class="solution-description">Advanced comparison capabilities across multiple selected areas. The AI identifies patterns, contrasts environmental conditions, and provides strategic recommendations for coordinated urban development across different neighborhoods.</p>
+    </div>
+    
+    <div class="solution-card">
+      <h3 class="solution-title">🔍 Cross-Metrics Integration</h3>
+      <p class="solution-description">Seamless integration with cross-metrics analysis to identify complex relationships between different NASA datasets (heat vs. population, housing vs. green spaces, etc.) and provide evidence-based recommendations.</p>
+    </div>
+    
+    <div class="solution-card">
+      <h3 class="solution-title">💬 Interactive Chat Interface</h3>
+      <p class="solution-description">Natural language chat interface allowing urban planners to ask specific questions about the selected data. The AI provides contextual responses based on current dataset selections and area configurations.</p>
+    </div>
+  </div>
 
+  <div class="code-section">
+    <div class="code-header">
+      <span class="code-title">🧠 AI Prompt Engineering</span>
+    </div>
+    <div class="code-content">
+      <pre><code class="language-python">def build_ai_prompt(area_data, dataset_type, cross_metrics):
+    """Structured prompt template for urban planning analysis"""
+    return f"""
+    As an urban planning expert using NASA Earth observation data, analyze {area_data}.
+
+    DATA CONTEXT:
+    - Data Type: {dataset_type}
+    - Current environmental metrics
+    - Cross-metrics correlations
+    - Historical trends
+
+    Provide recommendations in structured format:
+    • URBAN ANALYSIS: [Context]
+    • KEY FINDINGS: [Main issues]
+    • RECOMMENDED ACTIONS: [Specific interventions]
+    • STAKEHOLDER ENGAGEMENT: [Departments involved]
+    • MONITORING: [NASA datasets for tracking]
+    """</code></pre>
+    </div>
+    <div style="padding: 16px; background: rgba(0,191,166,0.1); border-top: 1px solid rgba(0,191,166,0.2);">
+      <p style="color: #cfd8dc; font-size: 14px; margin: 0; line-height: 1.5;">
+        <strong>AI Integration:</strong> Our AI Urban Advisor uses structured prompt engineering to ensure consistent, actionable outputs. The system automatically incorporates current NASA data selections, cross-metrics analysis, and area-specific context to generate evidence-based urban planning recommendations aligned with municipal priorities.
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: rgba(0,191,166,0.1); border-radius: 12px; border: 1px solid rgba(0,191,166,0.2);">
+    <h4 style="color: #00bfa6; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">🎯 Key Capabilities</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+      <div>
+        <h5 style="color: #e6f0ea; font-size: 14px; margin: 0 0 8px 0;">Automated Recommendations</h5>
+        <p style="color: #cfd8dc; font-size: 12px; line-height: 1.5; margin: 0;">One-click generation of comprehensive urban planning strategies based on selected NASA data</p>
+      </div>
+      <div>
+        <h5 style="color: #e6f0ea; font-size: 14px; margin: 0 0 8px 0;">Contextual Understanding</h5>
+        <p style="color: #cfd8dc; font-size: 12px; line-height: 1.5; margin: 0;">AI understands dataset semantics (higher=good for vegetation, higher=bad for pollution)</p>
+      </div>
+      <div>
+        <h5 style="color: #e6f0ea; font-size: 14px; margin: 0 0 8px 0;">Multi-year Analysis</h5>
+        <p style="color: #cfd8dc; font-size: 12px; line-height: 1.5; margin: 0;">Incorporates historical trends (2018-2024) and future predictions in recommendations</p>
+      </div>
+      <div>
+        <h5 style="color: #e6f0ea; font-size: 14px; margin: 0 0 8px 0;">Stakeholder Alignment</h5>
+        <p style="color: #cfd8dc; font-size: 12px; line-height: 1.5; margin: 0;">Recommendations include specific municipal departments and implementation frameworks</p>
+      </div>
+    </div>
+  </div>
+</section>
     <!-- Data Sources -->
     <section id="data-sources" class="content-section fade-in">
       <h2 class="section-title">Data Sources & Integration (Demo Dashboard)</h2>
