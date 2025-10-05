@@ -521,6 +521,8 @@
           <input id="yearSlider" type="range" min="2018" max="2024" step="2" value="2024">
           <div class="year-pill"><span id="yearValue">2024</span></div>
         </div>
+        <button id="topNavPredictionsBtn" style="background:#00bfa6;border:none;padding:6px 12px;color:#012;font-weight:600;cursor:pointer;border-radius:6px;font-size:13px;white-space:nowrap;">Future Predictions</button>
+        </div>
       </div>
     </div>
     <div id="loadingScreen">
@@ -1898,6 +1900,30 @@ function hideLoadingScreen() {
       for (const k of keys) {
         const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o);
       }
+      
+      // ADD THESE LINES TO SET DEFAULTS:
+      // Set default dataset to "air"
+      sel.value = 'air';
+      // Populate area select with air areas
+      populateAreaSelect('air');
+      
+      // Set default area to "abushagarah" after a small delay to ensure options are loaded
+      setTimeout(() => {
+        const areaSelect = document.getElementById('predAreaSelect');
+        if (areaSelect) {
+          // Try exact match first, then case-insensitive
+          const options = Array.from(areaSelect.options);
+          const abuOption = options.find(opt => 
+            opt.value.toLowerCase() === 'abushagarah' || 
+            opt.textContent.toLowerCase().includes('abushagarah')
+          );
+          if (abuOption) {
+            areaSelect.value = abuOption.value;
+            // Render the prediction with the default selections
+            renderPredictionFor('air', abuOption.value);
+          }
+        }
+      }, 100);
     }
 
     function populateAreaSelect(datasetKey) {
@@ -2941,6 +2967,17 @@ window.addEventListener('resize', () => {
   updateAIPanelSize();
   resizeCesiumContainer();
 });
+
+    // Add event listener for top navigation predictions button
+    document.getElementById('topNavPredictionsBtn').addEventListener('click', async () => {
+      const data = await loadPredictions();
+      if (!data) { 
+        alert('Predictions not available. Run the generation script first.'); 
+        return; 
+      }
+      populateDatasetSelect(); // This will now set the defaults
+      document.getElementById('predictionsModal').style.display = 'flex';
+    });
   </script>
 </body>
 </html>
